@@ -227,3 +227,30 @@ footer p {
         padding: 1.5rem;
     }
 }
+
+/* Estilos para el header dinámico */
+#header-container {
+    width: 100%;
+}
+
+/* Estilo para enlace activo */
+nav a.active {
+    color: var(--tan) !important;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+/* Estilos para el footer */
+footer {
+    background-color: var(--gray);
+    padding: 1.5rem;
+    text-align: center;
+    margin-top: 2rem;
+    border-top: 2px solid var(--tan);
+    color: var(--light-gray);
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}
