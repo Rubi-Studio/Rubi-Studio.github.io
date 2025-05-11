@@ -1,0 +1,229 @@
+:root {
+    --black: #1e1e1e;
+    --white: #f0f0f0;
+    --tan: #d2b48c;
+    --gray: #2e2e2e;
+    --light-gray: #e0e0e0;
+    --parchment: #f5f5dc;
+    --parchment-dark: #e0d8b0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--black);
+    color: var(--white);
+    margin: 0;
+    line-height: 1.6;
+}
+
+header {
+    background-color: var(--gray);
+    padding: 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    border-bottom: 2px solid var(--tan);
+}
+
+.cabecera-contenido {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.logo-nombre {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-nombre h1 {
+    color: var(--tan);
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+header nav {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+header nav a {
+    color: var(--light-gray);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+    padding: 0.5rem;
+}
+
+header nav a:hover {
+    color: var(--tan);
+    text-decoration: underline;
+}
+
+.container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+}
+
+.notice-board {
+    width: 100%;
+    max-width: 700px;
+}
+
+.notice-board h2 {
+    color: var(--tan);
+    border-bottom: 2px solid var(--tan);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.parchment {
+    background-color: var(--parchment);
+    padding: 2rem;
+    border: 2px solid var(--tan);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #333;
+    position: relative;
+    overflow: hidden;
+}
+
+.parchment::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(210, 180, 140, 0.1) 0%,
+        rgba(210, 180, 140, 0.2) 50%,
+        rgba(210, 180, 140, 0.1) 100%
+    );
+    pointer-events: none;
+}
+
+.parchment p {
+    margin: 1rem 0;
+}
+
+.parchment p strong {
+    color: #5a4a3a;
+}
+
+.parchment h3 {
+    color: #5a4a3a;
+    margin-top: 1.5rem;
+    border-bottom: 1px dashed var(--tan);
+    padding-bottom: 0.5rem;
+}
+
+.parchment ul {
+    list-style-type: none;
+    padding-left: 1rem;
+    margin: 1rem 0;
+}
+
+.parchment ul li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.parchment ul li::before {
+    content: "•";
+    color: var(--tan);
+    position: absolute;
+    left: 0;
+    font-size: 1.2rem;
+}
+
+.resources {
+    width: 100%;
+    max-width: 700px;
+}
+
+.resources h2 {
+    color: var(--tan);
+    border-bottom: 2px solid var(--tan);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.resources a {
+    display: inline-block;
+    color: var(--tan);
+    text-decoration: none;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--tan);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.resources a:hover {
+    background-color: var(--tan);
+    color: var(--black);
+    text-decoration: none;
+}
+
+/* Estilo para enlace activo */
+nav a.active {
+    color: var(--tan) !important;
+    text-decoration: underline;
+}
+
+/* Estilos para el pie de página */
+footer {
+    background-color: var(--gray);
+    padding: 1rem;
+    text-align: center;
+    margin-top: 2rem;
+    border-top: 2px solid var(--tan);
+}
+
+footer p {
+    margin: 0;
+    color: var(--light-gray);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .cabecera-contenido {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .logo-nombre {
+        justify-content: center;
+    }
+
+    header nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .container {
+        padding: 1rem;
+    }
+
+    .parchment {
+        padding: 1.5rem;
+    }
+}
