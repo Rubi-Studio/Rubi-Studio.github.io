@@ -54,11 +54,11 @@
                 return false;
             }
         }
-
+    
         // Cargar header y footer
         document.addEventListener('DOMContentLoaded', async () => {
-            // Cargar header
-            await loadHTML('header.html', 'header-container');
+            // Cargar header desde la subcarpeta "classes"
+            await loadHTML('classes/header.html', 'header-container');
             
             // Resaltar enlace activo en el nav
             const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -70,9 +70,9 @@
                     link.classList.add('active');
                 }
             });
-
-            // Cargar footer
-            await loadHTML('footer.html', 'footer-container');
+    
+            // Cargar footer desde la subcarpeta "classes"
+            await loadHTML('classes/footer.html', 'footer-container');
         });
     </script>
 </body>
