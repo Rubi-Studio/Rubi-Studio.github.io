@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bloodborne II</title>
-    <link rel="stylesheet" href="../style/style-ttrpg.css">
+    <title>Artesius</title>
+    <link rel="stylesheet" href="/style/style-ttrpg.css">
 </head>
 <body>
     <!-- Contenedor para el header cargado dinámicamente -->
@@ -15,14 +15,14 @@
             <section class="notice-board">
                 <h2>Tablón de Anuncios</h2>
                 <div class="parchment">
-                    <p>No hay sesiones planificadas para Bloodborne II.</p>
+                    <p>No hay sesiones planificadas para Artesius.</p>
                     </ul>
                 </div>
             </section>
 
             <section class="resources">
                 <h2>📜 Documentos y recursos</h2>
-                <p>Actualmente no hay recursos disponibles para Bloodborne II.</p>
+                <p>Actualmente no hay recursos disponibles para Artesius.</p>
                 <p>Pronto se añadirán más recursos.</p>
             </section>
         </main>
@@ -50,7 +50,7 @@
         // Cargar header y footer
         document.addEventListener('DOMContentLoaded', async () => {
             // Cargar header desde la subcarpeta "classes"
-            await loadHTML('classes/header.html', 'header-container');
+            await loadHTML('/ttrpg/classes/header.html', 'header-container');
             
             // Resaltar enlace activo en el nav
             const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -64,7 +64,7 @@
             });
     
             // Cargar footer desde la subcarpeta "classes"
-            await loadHTML('classes/footer.html', 'footer-container');
+            await loadHTML('/ttrpg/classes/footer.html', 'footer-container');
         });
     </script>
 </body>

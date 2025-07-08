@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Will of the Forge</title>
-    <link rel="stylesheet" href="../style/style-ttrpg.css">
+    <title>FAQ</title>
+    <link rel="stylesheet" href="/style/style-ttrpg.css">
 </head>
 <body>
     <!-- Contenedor para el header cargado dinámicamente -->
@@ -12,30 +12,21 @@
 
     <div class="container">
         <main class="content">
-            <section class="notice-board">
-                <h2>Tablón de Anuncios</h2>
+            <section class="faq">
+                <h2>Preguntas Frecuentes</h2>
                 <div class="parchment">
-                    <p>Viendo los resultados de la encuesta, las sesiones serán:</p>
-                    <p><strong>Los domingos por la tarde de forma presencial cada dos semanas.</strong></p>
-                    
-                    <ul>
-                        <li>Las sesiones quedan retrasadas hasta septiembre.</li>
-                    </ul>
-                    
-                    <h3>Para los que puedan jugar en Motril</h3>
-                    <ul>
-                        <li>Sabréis más de mí este verano.</li>
-                    </ul>
-                </div>
-            </section>
+                    <h3>¿Qué es Rubi's TTRPG Hub?</h3>
+                    <p>Es un sitio dedicado a mis juegos de rol de mesa, donde puedes encontrar información sobre mis campañas y recursos para jugadores.</p>
+                    <h3>¿Cómo puedo unirme a una campaña?</h3>
+                    <p>Puedes unirte a una campaña contactándome directamente. Las sesiones se organizan en función de la disponibilidad de los jugadores.</p>
 
-            <section class="resources">
-                <h2>📜 Documentos y recursos</h2>
-                <p><a href="https://docs.google.com/document/d/1Y5IOKUYYCTkF1VbeWkztCHCY6j06EMuFsM8ELcagGQE" target="_blank">→ Info para crear personajes</a></p>
+                </div>
             </section>
         </main>
     </div>
 
+
+   
     <!-- Contenedor para el footer cargado dinámicamente -->
     <div id="footer-container"></div>
 
@@ -58,7 +49,7 @@
         // Cargar header y footer
         document.addEventListener('DOMContentLoaded', async () => {
             // Cargar header desde la subcarpeta "classes"
-            await loadHTML('classes/header.html', 'header-container');
+            await loadHTML('/ttrpg/classes/header.html', 'header-container');
             
             // Resaltar enlace activo en el nav
             const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -72,7 +63,7 @@
             });
     
             // Cargar footer desde la subcarpeta "classes"
-            await loadHTML('classes/footer.html', 'footer-container');
+            await loadHTML('/ttrpg/classes/footer.html', 'footer-container');
         });
     </script>
 </body>

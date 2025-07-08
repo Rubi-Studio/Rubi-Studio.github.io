@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rubi's TTRPG Hub</title>
+    <title>Will of the Forge</title>
     <link rel="stylesheet" href="/style/style-ttrpg.css">
 </head>
 <body>
@@ -15,24 +15,22 @@
             <section class="notice-board">
                 <h2>Tablón de Anuncios</h2>
                 <div class="parchment">
-                    <h2>Info actual de Will of the Forge</h2>
-                    <p>Viendo los resultados de la encuesta, las sesiones serán:</p>
+                    <h3>Este verano jugaremos presencialmente en Motril y por discord</h3>
+                    <ul>
+                        <li>Los que jueguen en <strong>Motril</strong></li>
+                        <li>Empezaremos en algún momento a partir del 13 de Julio</li>
+                        <li>Los que jueguen por <strong>Discord</strong></li>
+                        <li>Empezaremos en algún momento a partir del 13 de Julio</li>
+                    </ul>
+
+                    <p>Después del verano:</p>
                     <p><strong>Los domingos por la tarde de forma presencial cada dos semanas.</strong></p>
-                    
-                    <ul>
-                        <li>Las sesiones quedan retrasadas hasta septiembre.</li>
-                    </ul>
-                    
-                    <h3>Para los que puedan jugar en Motril</h3>
-                    <ul>
-                        <li>Sabréis más de mí este verano.</li>
-                    </ul>
                 </div>
             </section>
 
             <section class="resources">
                 <h2>📜 Documentos y recursos</h2>
-                <p><a href="https://docs.google.com/document/d/1Y5IOKUYYCTkF1VbeWkztCHCY6j06EMuFsM8ELcagGQE" target="_blank">→ Info para crear personajes WotF</a></p>
+                <p><a href="https://docs.google.com/document/d/1Y5IOKUYYCTkF1VbeWkztCHCY6j06EMuFsM8ELcagGQE" target="_blank">→ Info para crear personajes</a></p>
             </section>
         </main>
     </div>
@@ -59,7 +57,7 @@
         // Cargar header y footer
         document.addEventListener('DOMContentLoaded', async () => {
             // Cargar header desde la subcarpeta "classes"
-            await loadHTML('classes/header.html', 'header-container');
+            await loadHTML('/ttrpg/classes/header.html', 'header-container');
             
             // Resaltar enlace activo en el nav
             const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -73,7 +71,7 @@
             });
     
             // Cargar footer desde la subcarpeta "classes"
-            await loadHTML('classes/footer.html', 'footer-container');
+            await loadHTML('/ttrpg/classes/footer.html', 'footer-container');
         });
     </script>
 </body>
