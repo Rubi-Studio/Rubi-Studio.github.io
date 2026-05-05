@@ -3,35 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bloodborne II</title>
-    <link rel="stylesheet" href="/style/style-ttrpg.css">
+    <title>Rubi Studio - El Diario del Héroe</title>
+    <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
-    <!-- Contenedor para el header cargado dinámicamente -->
     <div id="header-container"></div>
+    
+    <main class="hero-section">
+        <h1>El Diario del Héroe</h1>
+        <p class="subtitle">Construye un mundo, crea un personaje y vive una aventura de rol en solitario. Todo mientras escribes un diario impulsado por IA</p>
+        
+        <a href="juego.html" class="cta-button">Jugar a la Beta (Prototipo)</a>
 
-    <div class="container">
-        <main class="content">
-            <section class="notice-board">
-                <h2>Tablón de Anuncios</h2>
-                <div class="parchment">
-                    <p>No hay sesiones planificadas para Bloodborne II.</p>
-                    </ul>
-                </div>
-            </section>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>Escritura Libre</h3>
+                <p>Juega escribiendo tu historia sin interrupciones. El motor leerá tu texto y avanzará la trama.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Reglas Automáticas</h3>
+                <p>El sistema detecta tus <i>Tags</i> y calcula si tienes éxito o fallas basándose en tu narración.</p>
+            </div>
+            <div class="feature-card">
+                <h3>IA Narrativa</h3>
+                <p>Recibe giros de guion inesperados, semillas de inspiración y evoluciona a través del Viaje del Héroe.</p>
+            </div>
+        </div>
+    </main>
 
-            <section class="resources">
-                <h2>📜 Documentos y recursos</h2>
-                <p>Actualmente no hay recursos disponibles para Bloodborne II.</p>
-                <p>Pronto se añadirán más recursos.</p>
-            </section>
-        </main>
-    </div>
-
-    <!-- Contenedor para el footer cargado dinámicamente -->
     <div id="footer-container"></div>
 
-    <!-- Script para cargar header y footer -->
     <script>
         // Función para cargar contenido HTML externo
         async function loadHTML(url, elementId) {
@@ -49,8 +50,7 @@
     
         // Cargar header y footer
         document.addEventListener('DOMContentLoaded', async () => {
-            // Cargar header desde la subcarpeta "classes"
-            await loadHTML('/ttrpg/classes/header.html', 'header-container');
+            await loadHTML('classes/header.html', 'header-container');
             
             // Resaltar enlace activo en el nav
             const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -63,8 +63,7 @@
                 }
             });
     
-            // Cargar footer desde la subcarpeta "classes"
-            await loadHTML('/ttrpg/classes/footer.html', 'footer-container');
+            await loadHTML('classes/footer.html', 'footer-container');
         });
     </script>
 </body>

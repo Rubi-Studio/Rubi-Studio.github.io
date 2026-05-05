@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --bg: #edeec9;
+            --surface: #77bfa3;
+            --primary: #98c9a3;
+            --accent: #69b578;
+            --highlight: #bfd8bd;
+            --text: #282a2f;
+            --text-darkenned: #181d27;
+        }
+
+        body {
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid var(--accent);
+            width: 100%;
+            max-width: 1100px; /* Hace el recuadro mucho más grande */
+        }
+
+        h2 {
+            color: var(--text-darkenned);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+        }
+
+        /* Fuerza al gráfico a expandirse */
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100% !important;
+            height: auto !important;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Arquitectura Técnica del Sistema</h2>
+    <div class="mermaid">
+    %%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#181d27', 'lineColor': '#69b578', 'fontFamily': 'Segoe UI', 'nodesep': 50, 'ranksep': 40}}}%%
+    graph TD
+        classDef cliente fill:#edeec9,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef servidor fill:#98c9a3,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef ia fill:#bfd8bd,stroke:#77bfa3,stroke-width:2px,color:#181d27,stroke-dasharray: 5 5;
+
+        subgraph Navegador [CLIENTE - Entorno de Ejecución]
+            FE[Frontend: HTML/CSS/JS]:::cliente
+            CL[Capa Lógica: Gestión de Estado]:::cliente
+            FE <--> CL
+        end
+
+        subgraph Vercel [SERVIDOR - Backend Serverless]
+            Node[Node.js Runtime]:::servidor
+            API[API Endpoints / Edge Functions]:::servidor
+            Node --- API
+        end
+
+        subgraph Externo [PROVEEDOR IA]
+            LLM[Modelo de Lenguaje: LLM]:::ia
+        end
+
+        %% Conexiones de arquitectura
+        CL -- "Peticiones Asíncronas (Fetch)" --> API
+        API -- "Cifrado y Gestión de Keys" --> LLM
+        LLM -- "Respuesta Estructurada (JSON)" --> API
+        API -- "Datos de Juego Actualizados" --> CL
+
+        %% Estilos de los contenedores
+        style Navegador fill:none,stroke:#69b578,stroke-width:1px,stroke-dasharray: 5 5
+        style Vercel fill:none,stroke:#77bfa3,stroke-width:1px,stroke-dasharray: 5 5
+        style Externo fill:none,stroke:#98c9a3,stroke-width:1px,stroke-dasharray: 5 5
+    </div>
+</div>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+        startOnLoad: true,
+        flowchart: { 
+            curve: 'basis',
+            padding: 20
+        }
+    });
+</script>
+
+</body>
+</html>

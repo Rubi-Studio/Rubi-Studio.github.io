@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jugar - El Diario del Héroe</title>
+    <!-- Evita el error 404 del favicon -->
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="style/style.css">
+</head>
+<body>
+    <div id="header-container"></div>
+
+    <div class="game-wrapper">
+        <div style="text-align: right; margin-bottom: 10px;">
+            <button onclick="showApiConfig()" style="background: none; border: 1px solid var(--accent); color: var(--text-darkenned); cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 0.8em;">⚙️ Configurar API</button>
+        </div>
+
+        <div class="api-config" id="apiConfig">
+            <label>🔑 API Key:</label>
+            <input type="password" id="apiKey" placeholder="sk-proj-..." />
+            <button onclick="saveApiKey()">Guardar Clave</button>
+        </div>
+
+        <div id="setupScreen">
+            <div class="setup-header">
+                <h2>Creación de Personaje</h2>
+                <button class="btn-random" onclick="randomizeSetup()">🎲 Aleatorio</button>
+            </div>
+            <div class="form-group">
+                <label>1. Nombre y Esencia (Ej: Kael, el Paladín exiliado)</label>
+                <input type="text" id="setupName" value="Kael, paladín" required>
+            </div>
+            <div class="form-group">
+                <label>2. Origen o Trasfondo (Ej: Huérfano de guerra)</label>
+                <input type="text" id="setupOrigin" value="Exiliado de las Tierras Altas" required>
+            </div>
+            <div class="form-group">
+                <label>3. Motivación principal (Tag Positivo)</label>
+                <input type="text" id="setupMot" value="Redención" required>
+            </div>
+            <div class="form-group">
+                <label>4. Defecto o Trauma (Tag Negativo)</label>
+                <input type="text" id="setupFlaw" value="Miedo a la oscuridad" required>
+            </div>
+            <div class="form-group">
+                <label>4. Nivel de Semilla (Ayuda narrativa de la IA)</label>
+                <select id="setupSeedLevel">
+                    <option value="Inspirativas (Palabras sueltas)">Inspirativas (Ej: Ceniza, reloj roto)</option>
+                    <option value="Moderadas (Frases ambiguas)">Moderadas (Ej: El mercado está vacío)</option>
+                    <option value="Escénicas (Escenarios directos)">Escénicas (Ej: Un guardia te corta el paso)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>6. Setting o Sinopsis</label>
+                <input type="text" id="setupSetting" value="Fantasía oscura en un reino nevado." required>
+            </div>
+            <button class="btn-start" onclick="startGame()">Comenzar Aventura</button>
+        </div>
+
+        <div id="gameScreen" style="display: none;">
+            
+            <div class="diary-panel">
+                <div class="system-controls">
+                    <span id="currentStageDisplay">Etapa: 1. Mundo Ordinario</span>
+                    <button onclick="nextStage()" style="padding: 5px; cursor:pointer;">Avanzar Etapa</button>
+                </div>
+                
+                <div class="difficulty-indicator">Dificultad del siguiente desafío: <span id="diffValue">?</span></div>
+                <div id="diaryDisplay" class="persistent-diary"></div>
+                
+                <textarea id="playerText" class="diary-input" placeholder="Escribe tu siguiente acción o entrada del diario..."></textarea>
+                <button id="sendBtn" class="btn-send" onclick="turnAI()">Añadir al Diario y Jugar</button>
+                <div id="loading">El Destino está decidiendo...</div>
+            </div>
+
+            <div class="system-panel">
+                <div class="codex-section">
+                    <h3>Códice del Héroe <span class="help-icon" onclick="showHelp('tags')">?</span></h3>
+                    <div id="tagsDisplay" class="tags-container">
+                        </div>
+                </div>
+                <div class="codex-section">
+                    <h3>Estados <span class="help-icon" onclick="showHelp('states')">?</span></h3>
+                    <div id="statusDisplay" class="tags-container">
+                        <span style="color:#999; font-size:0.9em;">Ninguno</span>
+                    </div>
+                </div>
+                
+                <div class="ai-response" id="aiResponsePanel" style="display: none;">
+                    <p id="evalText" style="font-size:0.9em;"></p>
+                    <div class="ai-seed" id="seedText"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

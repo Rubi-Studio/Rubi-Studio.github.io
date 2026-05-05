@@ -9,15 +9,50 @@
 </head>
 
 <body>
+    <div id="header-container"></div>
+    <main>
     <h1>Bienvenid@ a <span class="marca">rubi.studio</span> :)</h1>
-    <p>Esta será mi futura web creativa y profesional.</p>
-    <p>Aquí compartiré proyectos creativos, y puede que algunas secciones estén protegidas si son cosas solo para amigos
-        <3< /p>
-            <p>Mientras tanto, puedes echarle un vistazo a:</p>
-            <ul>
-                <li><a href="RubiRA-CV.pdf" target="_blank">Mi Curriculum Vitae</a></li>
-                <li><a href="ttrpg/" target="_blank">Mis juegos de rol</a></li>
-            </ul>
+    <p>Esta será mi futura web profesional.</p>
+    <p>Aquí compartiré proyectos creativos</p>
+    </main>
 </body>
+
+    <div id="footer-container"></div>
+
+<script>
+        // Función para cargar contenido HTML externo
+        async function loadHTML(url, elementId) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Error al cargar ${url}: ${response.status}`);
+                const html = await response.text();
+                document.getElementById(elementId).innerHTML = html;
+                return true;
+            } catch (error) {
+                console.error(error);
+                return false;
+            }
+        }
+    
+        // Cargar header y footer
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Cargar header desde la subcarpeta "classes"
+            await loadHTML('classes/header.html', 'header-container');
+            
+            // Resaltar enlace activo en el nav
+            const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+            const navLinks = document.querySelectorAll('nav a');
+            
+            navLinks.forEach(link => {
+                const linkPage = link.getAttribute('href');
+                if (currentPage === linkPage) {
+                    link.classList.add('active');
+                }
+            });
+    
+            // Cargar footer desde la subcarpeta "classes"
+            await loadHTML('classes/footer.html', 'footer-container');
+        });
+    </script>
 
 </html>

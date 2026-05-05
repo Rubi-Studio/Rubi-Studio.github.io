@@ -1,37 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ</title>
-    <link rel="stylesheet" href="/style/style-ttrpg.css">
+    <title>Rubi Studio</title>
+    <link rel="stylesheet" href="..\style\style.css">
 </head>
+
 <body>
-    <!-- Contenedor para el header cargado dinámicamente -->
     <div id="header-container"></div>
+    <main>
+    <h1>Contacto</h1>
+    <p>Más adelante habrá datos de contacto</p>
+    </main>
+</body>
 
-    <div class="container">
-        <main class="content">
-            <section class="faq">
-                <h2>Preguntas Frecuentes</h2>
-                <div class="parchment">
-                    <h3>¿Qué es Rubi's TTRPG Hub?</h3>
-                    <p>Es un sitio dedicado a mis juegos de rol de mesa, donde puedes encontrar información sobre mis campañas y recursos para jugadores.</p>
-                    <h3>¿Cómo puedo unirme a una campaña?</h3>
-                    <p>Puedes unirte a una campaña contactándome directamente. Las sesiones se organizan en función de la disponibilidad de los jugadores.</p>
-
-                </div>
-            </section>
-        </main>
-    </div>
-
-
-   
-    <!-- Contenedor para el footer cargado dinámicamente -->
     <div id="footer-container"></div>
 
-    <!-- Script para cargar header y footer -->
-    <script>
+<script>
         // Función para cargar contenido HTML externo
         async function loadHTML(url, elementId) {
             try {
@@ -49,7 +36,7 @@
         // Cargar header y footer
         document.addEventListener('DOMContentLoaded', async () => {
             // Cargar header desde la subcarpeta "classes"
-            await loadHTML('/ttrpg/classes/header.html', 'header-container');
+            await loadHTML('../classes/header.html', 'header-container');
             
             // Resaltar enlace activo en el nav
             const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -63,8 +50,8 @@
             });
     
             // Cargar footer desde la subcarpeta "classes"
-            await loadHTML('/ttrpg/classes/footer.html', 'footer-container');
+            await loadHTML('../classes/footer.html', 'footer-container');
         });
     </script>
-</body>
+
 </html>

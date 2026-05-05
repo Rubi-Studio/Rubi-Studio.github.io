@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --bg: #edeec9;
+            --surface: #77bfa3;
+            --primary: #98c9a3;
+            --accent: #69b578;
+            --highlight: #bfd8bd;
+            --text: #282a2f;
+            --text-darkenned: #181d27;
+        }
+
+        body {
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid var(--accent);
+            width: 100%;
+            max-width: 1100px; /* Hace el recuadro mucho más grande */
+        }
+
+        h2 {
+            color: var(--text-darkenned);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+        }
+
+        /* Fuerza al gráfico a expandirse */
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100% !important;
+            height: auto !important;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Estructura de Capas y Flujo Lógico</h2>
+    <div class="mermaid">
+    %%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#181d27', 'lineColor': '#69b578', 'fontFamily': 'Segoe UI', 'nodesep': 30, 'ranksep': 40}}}%%
+    graph TD
+        classDef frontend fill:#edeec9,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef logica fill:#98c9a3,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef backend fill:#bfd8bd,stroke:#77bfa3,stroke-width:2px,color:#181d27;
+        classDef llm fill:#77bfa3,stroke:#69b578,stroke-width:2px,color:#181d27;
+        
+        subgraph S1 [FRONTEND]
+            UI_Start[Visualización Estado]:::frontend
+            UI_Input[Entrada de Usuario]:::frontend
+            UI_Update[Actualización Interfaz]:::frontend
+        end
+
+        subgraph S2 [CAPA LOGICA]
+            Log_Init{Generar Dificultad}:::logica
+            Log_Calc{Cálculo Resolución}:::logica
+            Log_Mod[Ajustar Niveles Tags]:::logica
+        end
+
+        subgraph S3 [BACKEND / LLM]
+            LLM_Detect[Detección Semántica]:::llm
+            LLM_Gen[Generación Narrativa]:::llm
+        end
+
+        %% Conexiones
+        Log_Init --> UI_Start
+        UI_Start --> UI_Input
+        UI_Input --> LLM_Detect
+        
+        LLM_Detect --> Log_Calc
+        Log_Calc --> Log_Mod
+        
+        Log_Mod --> LLM_Gen
+        LLM_Gen --> UI_Update
+        UI_Update -.-> Log_Init
+
+        %% Estilos de contenedores simplificados
+        style S1 fill:none,stroke:#69b578,stroke-width:1px,stroke-dasharray: 5 5
+        style S2 fill:none,stroke:#77bfa3,stroke-width:1px,stroke-dasharray: 5 5
+        style S3 fill:none,stroke:#98c9a3,stroke-width:1px,stroke-dasharray: 5 5
+    </div>
+</div>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+        startOnLoad: true,
+        flowchart: { 
+            curve: 'basis',
+            padding: 10
+        }
+    });
+</script>
+
+</body>
+</html>
