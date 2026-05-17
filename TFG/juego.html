@@ -1,101 +1,188 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jugar - El Diario del Héroe</title>
-    <!-- Evita el error 404 del favicon -->
-    <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="style/style.css">
-</head>
-<body>
-    <div id="header-container"></div>
 
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>El Diario del Héroe - Beta</title>
+    <link rel="stylesheet" href="style/style.css" />
+</head>
+
+<body>
     <div class="game-wrapper">
-        <div style="text-align: right; margin-bottom: 10px;">
-            <button onclick="showApiConfig()" style="background: none; border: 1px solid var(--accent); color: var(--text-darkenned); cursor: pointer; border-radius: 4px; padding: 4px 8px; font-size: 0.8em;">⚙️ Configurar API</button>
+        <div class="top-bar">
+            <button class="icon-button" onclick="toggleDebug()" title="Modo Debug">🐛</button>
+            <button class="secondary-button" onclick="showApiConfig()">⚙️ Configurar API</button>
         </div>
 
         <div class="api-config" id="apiConfig">
             <label>🔑 API Key:</label>
             <input type="password" id="apiKey" placeholder="sk-proj-..." />
-            <button onclick="saveApiKey()">Guardar Clave</button>
+            <label>🤖 Modelo:</label>
+            <select id="modelSelect">
+                <option value="gpt-4o-mini">GPT-4o Mini</option>
+                <option value="gpt-4o">GPT-4o</option>
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (ligero)</option>
+            </select>
+            <div class="note-text">Nota: Para Semillas "Inspirativas" puedes usar modelos menos potentes para ahorrar tokens.</div>
+            <button class="primary-button" onclick="saveApiKey()">Guardar Cambios</button>
         </div>
 
-        <div id="setupScreen">
+        <div id="debugPanel" class="debug-panel">
+            <strong>DEBUG</strong>
+            <p class="help-text">No hay llamadas a la IA aún. Activa el modo debug y realiza una acción para ver la traza.</p>
+        </div>
+
+        <div id="menuScreen" class="menu-screen">
+            <div class="menu-header">
+                <h1>Mis diarios</h1>
+                <p class="menu-subtitle">Carga una partida guardada o crea un diario nuevo. También puedes descargar la partida o el diario para conservarlo fuera del navegador.</p>
+            </div>
+            <div class="menu-actions">
+                <button class="btn-start" onclick="newDiary()">Nuevo diario</button>
+                <button class="secondary-button" onclick="renderSaveList()">Actualizar lista</button>
+                <button class="secondary-button" onclick="openSaveFilePicker()">Cargar partida descargada</button>
+                <input id="loadSaveFileInput" type="file" accept="application/json" class="hidden" onchange="handleSaveFileInput(event)" />
+            </div>
+            <div id="saveList" class="save-list"></div>
+            <div class="menu-note">Los diarios se guardan localmente en este equipo. Descarga tu partida o el diario para conservarlo fuera del navegador.</div>
+        </div>
+
+        <div id="setupScreen" class="hidden">
             <div class="setup-header">
                 <h2>Creación de Personaje</h2>
                 <button class="btn-random" onclick="randomizeSetup()">🎲 Aleatorio</button>
             </div>
+
             <div class="form-group">
-                <label>1. Nombre y Esencia (Ej: Kael, el Paladín exiliado)</label>
-                <input type="text" id="setupName" value="Kael, paladín" required>
+                <label>Nombre y Esencia:</label>
+                <input type="text" id="setupName" value="Kael, paladín" />
             </div>
             <div class="form-group">
-                <label>2. Origen o Trasfondo (Ej: Huérfano de guerra)</label>
-                <input type="text" id="setupOrigin" value="Exiliado de las Tierras Altas" required>
+                <label>Origen:</label>
+                <input type="text" id="setupOrigin" value="Exiliado de las Tierras Altas" />
             </div>
             <div class="form-group">
-                <label>3. Motivación principal (Tag Positivo)</label>
-                <input type="text" id="setupMot" value="Redención" required>
+                <label>Motivación:</label>
+                <input type="text" id="setupMot" value="Redención" />
             </div>
             <div class="form-group">
-                <label>4. Defecto o Trauma (Tag Negativo)</label>
-                <input type="text" id="setupFlaw" value="Miedo a la oscuridad" required>
+                <label>Defecto:</label>
+                <input type="text" id="setupFlaw" value="Miedo a la oscuridad" />
             </div>
             <div class="form-group">
-                <label>4. Nivel de Semilla (Ayuda narrativa de la IA)</label>
+                <label>Nivel de Semilla <span class="help-icon" onclick="showHelp('semilla')">ⓘ</span></label>
                 <select id="setupSeedLevel">
-                    <option value="Inspirativas (Palabras sueltas)">Inspirativas (Ej: Ceniza, reloj roto)</option>
-                    <option value="Moderadas (Frases ambiguas)">Moderadas (Ej: El mercado está vacío)</option>
-                    <option value="Escénicas (Escenarios directos)">Escénicas (Ej: Un guardia te corta el paso)</option>
+                    <option value="Inspirativas">Inspirativas (Solo conceptos)</option>
+                    <option value="Moderadas">Moderadas (Frases cortas)</option>
+                    <option value="Escénicas">Escénicas (Escenarios directos)</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>6. Setting o Sinopsis</label>
-                <input type="text" id="setupSetting" value="Fantasía oscura en un reino nevado." required>
+                <label>Ambientación:</label>
+                <input type="text" id="setupSetting" value="Fantasía oscura en un reino nevado." />
+            </div>
+            <div class="form-group">
+                <label>Objeto inicial (opcional):</label>
+                <input type="text" id="setupItem" placeholder="Poción, llave, amuleto..." />
             </div>
             <button class="btn-start" onclick="startGame()">Comenzar Aventura</button>
         </div>
 
-        <div id="gameScreen" style="display: none;">
-            
-            <div class="diary-panel">
-                <div class="system-controls">
-                    <span id="currentStageDisplay">Etapa: 1. Mundo Ordinario</span>
-                    <button onclick="nextStage()" style="padding: 5px; cursor:pointer;">Avanzar Etapa</button>
+        <div id="gameScreen" class="game-screen hidden">
+            <div class="game-actions">
+                <div class="save-title-group">
+                    <input id="saveTitle" class="save-title-input" type="text" placeholder="Título para la partida" />
+                    <button class="secondary-button" onclick="saveCurrentGame()">Guardar partida</button>
                 </div>
-                
-                <div class="difficulty-indicator">Dificultad del siguiente desafío: <span id="diffValue">?</span></div>
-                <div id="diaryDisplay" class="persistent-diary"></div>
-                
-                <textarea id="playerText" class="diary-input" placeholder="Escribe tu siguiente acción o entrada del diario..."></textarea>
-                <button id="sendBtn" class="btn-send" onclick="turnAI()">Añadir al Diario y Jugar</button>
-                <div id="loading">El Destino está decidiendo...</div>
+                <button class="secondary-button" onclick="downloadCurrentSave()">Descargar partida</button>
+                <button class="secondary-button" onclick="downloadCurrentDiary()">Descargar diario</button>
+                <button class="secondary-button" onclick="showMenu()">Volver al menú</button>
             </div>
-
-            <div class="system-panel">
-                <div class="codex-section">
-                    <h3>Códice del Héroe <span class="help-icon" onclick="showHelp('tags')">?</span></h3>
-                    <div id="tagsDisplay" class="tags-container">
+            <div class="game-columns">
+                <div class="diary-panel">
+                    <div class="system-controls">
+                        <div class="stage-row">
+                            <span id="currentStageDisplay" class="stage-label">Etapa: 1</span>
+                            <span class="help-icon" onclick="showHelp('etapa')">ⓘ</span>
+                            <button class="mini-button" onclick="nextStage()">Avanzar Etapa</button>
                         </div>
-                </div>
-                <div class="codex-section">
-                    <h3>Estados <span class="help-icon" onclick="showHelp('states')">?</span></h3>
-                    <div id="statusDisplay" class="tags-container">
-                        <span style="color:#999; font-size:0.9em;">Ninguno</span>
+                        <button class="icon-button" onclick="toggleRAG()" title="Abrir Memoria del Mundo">📖 Memoria</button>
+                    </div>
+
+                    <div class="difficulty-indicator">
+                        Dificultad <span class="help-icon" onclick="showHelp('dificultad')">ⓘ</span> :
+                        <span id="diffValue" class="difficulty-value">?</span>
+                    </div>
+
+                    <div id="diaryDisplay" class="persistent-diary"></div>
+
+                    <textarea id="playerText" class="diary-input" placeholder="Escribe tu entrada en el diario..."></textarea>
+                    <button id="sendBtn" class="btn-send" onclick="turnAI()">Añadir al Diario</button>
+                    <div id="loading" class="loading-text">El Destino está decidiendo...</div>
+
+                    <div id="ragPanel" class="rag-panel">
+                        <h3 class="panel-heading">📖 Memoria del Mundo (RAG) <span class="help-icon" onclick="showHelp('rag')">ⓘ</span></h3>
+                        <p class="help-text">Puedes editar esto manualmente para guiar a la IA.</p>
+                        <div class="panel-block">
+                            <strong>Lore y Mundo:</strong>
+                            <div id="worldLore" class="editable-box" contenteditable="true"></div>
+                        </div>
+                        <div class="panel-block">
+                            <strong>Resumen de la Trama:</strong>
+                            <div id="plotSummary" class="editable-box" contenteditable="true"></div>
+                        </div>
+                        <div class="panel-block">
+                            <strong>Personajes en Memoria:</strong>
+                            <div id="charactersInMemory" class="editable-box">
+                                <span class="help-text">Sin personajes registrados</span>
+                            </div>
+                        </div>
+                        <div class="panel-block">
+                            <strong>Lugares en Memoria:</strong>
+                            <div id="placesInMemory" class="editable-box">
+                                <span class="help-text">Sin lugares registrados</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="ai-response" id="aiResponsePanel" style="display: none;">
-                    <p id="evalText" style="font-size:0.9em;"></p>
-                    <div class="ai-seed" id="seedText"></div>
+
+                <div class="system-panel">
+                    <div class="codex-section">
+                        <h3 class="panel-heading">Rasgos <span class="help-icon" onclick="showHelp('tags')">ⓘ</span></h3>
+                        <div id="tagsDisplay" class="tags-container"></div>
+
+                        <h3 class="panel-heading">Estados Temporales <span class="help-icon" onclick="showHelp('estados')">ⓘ</span></h3>
+                        <div id="statusDisplay" class="tags-container"></div>
+
+                        <h3 class="panel-heading">Inventario <span class="help-icon" onclick="showHelp('inventario')">ⓘ</span></h3>
+                        <div id="inventoryDisplay" class="tags-container"></div>
+                    </div>
+
+                    <div id="aiResponsePanel" class="ai-response">
+                        <h3 class="panel-heading">Semilla Narrativa <span class="help-icon" onclick="showHelp('semilla_juego')">ⓘ</span></h3>
+                        <div id="seedText" class="ai-seed"></div>
+                        <p id="evalText" class="ai-result"></p>
+                    </div>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <script src="game.js"></script>
+    <div id="popupOverlay" class="popup-overlay">
+        <div class="popup-card">
+            <div class="popup-header">
+                <span id="popupTitle">Aviso</span>
+                <button id="popupClose" class="popup-close" onclick="closePopup()">×</button>
+            </div>
+            <div id="popupMessage" class="popup-message"></div>
+            <div class="popup-actions">
+                <button class="popup-button" onclick="closePopup()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
 </body>
+
 </html>
