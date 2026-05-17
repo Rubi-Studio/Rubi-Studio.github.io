@@ -1,9 +1,10 @@
 import { etapasViaje, getSeedInstruction, pickChispas, condenseSummary, normalizeTagObjects, normalizeInitialTagObjects } from './utils.js';
 import { validatePlayerInput, detectGameBreaking, validateAIAdherence } from './validation.js';
-import { checkApiKey, showApiConfig, saveApiKey, randomizeSetup, toggleRAG, toggleDebug, nextStage, showHelp, showMenu, showSetupScreen, showGameScreen, showPopup, closePopup, notify, renderCodex, restoreModelSelection, saveGameState, loadSavedGame, deleteSavedGame, downloadSaveById, downloadDiaryById, renderSaveList } from './ui.js';
+import { checkApiKey, showApiConfig, saveApiKey, randomizeSetup, toggleRAG, toggleDebug, nextStage, showHelp, showMenu, showSetupScreen, showGameScreen, showPopup, closePopup, notify, showToast, renderCodex, restoreModelSelection, saveGameState, loadSavedGame, deleteSavedGame, downloadSaveById, downloadDiaryById, renderSaveList } from './ui.js';
 import { executeOpenAI } from './openai.js';
 
 let gameState = {};
+let gameReady = false;
 let turnPending = false;
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -17,6 +18,22 @@ window.addEventListener('DOMContentLoaded', () => {
     restoreModelSelection();
     renderSaveList();
     randomizeSetup();
+
+    const autoSaveToggle = document.getElementById('autoSaveToggle');
+    if (autoSaveToggle) {
+        autoSaveToggle.checked = localStorage.getItem('hero_auto_save') === 'true';
+        autoSaveToggle.addEventListener('change', () => {
+            localStorage.setItem('hero_auto_save', autoSaveToggle.checked ? 'true' : 'false');
+            showToast(autoSaveToggle.checked ? 'Guardado automático activado.' : 'Guardado automático desactivado.', 'info');
+        });
+    }
+
+    window.addEventListener('keydown', (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+            event.preventDefault();
+            saveCurrentGame({ toastText: 'Partida guardada.' });
+        }
+    });
 });
 
 async function startGame() {
@@ -49,6 +66,7 @@ async function startGame() {
     const initialItem = document.getElementById('setupItem')?.value.trim();
     if (initialItem) gameState.inventory.push(initialItem);
     document.getElementById('diaryDisplay').innerHTML = '';
+    gameReady = false;
 
     showGameScreen();
     renderCodex(gameState);
@@ -143,6 +161,7 @@ async function generateInitialSeed() {
         return;
     }
     document.getElementById('loading').style.display = 'none';
+    gameReady = true;
 }
 
 function renderDiaryEntries() {
@@ -168,15 +187,25 @@ function refreshGameScreen() {
     renderDiaryEntries();
 }
 
-function saveCurrentGame() {
-    if (!gameState || !gameState.name) {
-        showPopup('No hay juego activo para guardar.', 'warning', 'Guardar');
+function saveCurrentGame(options = {}) {
+    const { toastText } = options;
+    if (!gameReady || !gameState || !gameState.name) {
+        showPopup('Aún no se ha iniciado la partida. Espera a que cargue y prueba de nuevo.', 'warning', 'Guardar');
         return;
     }
     const titleInput = document.getElementById('saveTitle');
     const saveTitle = titleInput?.value.trim();
-    saveGameState(gameState, saveTitle);
-    notify('Partida guardada localmente.', 'success');
+    if (saveTitle) gameState.saveTitle = saveTitle;
+    const saveId = saveGameState(gameState, saveTitle);
+    if (saveId) {
+        gameState.saveId = saveId;
+    }
+    const message = toastText || 'Partida guardada localmente.';
+    if (typeof showToast === 'function') {
+        showToast(message, 'success');
+    } else {
+        notify(message, 'success');
+    }
 }
 
 function downloadCurrentSave() {
@@ -228,6 +257,8 @@ function loadSaveData(record) {
         return;
     }
     gameState = record.gameState;
+    if (record.meta?.id) gameState.saveId = record.meta.id;
+    gameReady = true;
     showGameScreen();
     refreshGameScreen();
     notify('Partida cargada desde archivo.', 'success');
@@ -235,6 +266,7 @@ function loadSaveData(record) {
 
 function newDiary() {
     gameState = {};
+    gameReady = false;
     const diaryDisplay = document.getElementById('diaryDisplay');
     if (diaryDisplay) diaryDisplay.innerHTML = '';
     showSetupScreen();
@@ -247,6 +279,8 @@ function loadSave(saveId) {
         return;
     }
     gameState = record.gameState;
+    gameState.saveId = saveId;
+    gameReady = true;
     showGameScreen();
     refreshGameScreen();
 }
@@ -464,6 +498,7 @@ async function generateNextSeed() {
         turnPending = false;
         renderCodex(gameState);
         refreshGameScreen();
+        if (isAutoSaveEnabled()) saveCurrentGame({ toastText: 'Guardado automático tras el turno.' });
         if (nextBtn) nextBtn.style.display = 'none';
     } catch (e) {
         document.getElementById('loading').style.display = 'none';
@@ -478,6 +513,10 @@ async function generateNextSeed() {
     if (nextBtn) nextBtn.disabled = false;
     const sendBtn = document.getElementById('sendBtn');
     if (sendBtn) sendBtn.disabled = false;
+}
+
+function isAutoSaveEnabled() {
+    return document.getElementById('autoSaveToggle')?.checked === true;
 }
 
 window.startGame = startGame;

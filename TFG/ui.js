@@ -140,13 +140,18 @@ export function showGameScreen() {
 export function saveGameState(gameState, title) {
     if (!gameState || !gameState.name) return null;
     const list = getSavedGames();
-    const saveId = createSaveId();
+    let saveId = gameState.saveId || null;
+    if (saveId) {
+        const existing = loadSavedGame(saveId);
+        if (!existing) saveId = null;
+    }
+    if (!saveId) saveId = createSaveId();
     const meta = {
         id: saveId,
-        title: title || `Diario de ${gameState.name}`,
+        title: title || gameState.saveTitle || `Diario de ${gameState.name}`,
         updated: new Date().toISOString()
     };
-    const record = { meta, gameState };
+    const record = { meta, gameState: { ...gameState, saveId } };
     localStorage.setItem(`${SAVE_KEY_PREFIX}${saveId}`, JSON.stringify(record));
     persistSavedGames([meta, ...list.filter(item => item.id !== saveId)]);
     renderSaveList();
@@ -279,8 +284,32 @@ export function closePopup() {
     if (overlay) overlay.style.display = 'none';
 }
 
+function createToastContainer() {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+export function showToast(message, type = 'info', duration = 2200) {
+    const container = createToastContainer();
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerText = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(14px)';
+        setTimeout(() => toast.remove(), 200);
+    }, duration);
+}
+
 export function notify(message, type = 'info') {
-    showPopup(message, type, type === 'error' ? 'Error' : type === 'success' ? 'Éxito' : 'Aviso');
+    showToast(message, type);
 }
 
 export function renderCodex(gameState) {
