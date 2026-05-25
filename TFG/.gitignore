@@ -1,0 +1,7 @@
+# Variables de entorno (no subir a GitHub)
+.env.local
+.env.*.local
+
+# Logs
+node_modules/
+*.log

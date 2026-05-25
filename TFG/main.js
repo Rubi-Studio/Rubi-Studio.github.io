@@ -37,17 +37,16 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 async function startGame() {
-    const key = localStorage.getItem('hero_api_key');
-    if (!key) {
-        showPopup('Guarda la API Key primero.', 'error', 'Clave API faltante');
-        return;
-    }
+    // Nota: La API Key ya no es necesaria en el cliente
+    // Se maneja de forma segura en el servidor (/api/openai)
 
     gameState = {
         name: document.getElementById('setupName').value,
         setting: document.getElementById('setupSetting').value,
         seedLevel: document.getElementById('setupSeedLevel').value,
+        duration: document.getElementById('setupDuration').value,
         stageIndex: 0,
+        turnCount: 0,
         tags: [],
         status: [],
         inventory: [],
@@ -133,7 +132,7 @@ async function generateInitialSeed() {
     - Si el jugador describe un rasgo largo o muy específico, simplifica conservando el concepto real (por ejemplo "Paladín de la Iglesia de la diosa Pharah" puede ser "Paladín").
     - No inventes sinónimos que cambien el significado. Si el defecto es "Miedo a la oscuridad", conserva el núcleo del miedo a la oscuridad, no lo conviertas en "Miedo Oculto".
     - La semilla debe reflejar el nivel de semilla elegido y la ambientación proporcionada.
-    - Integra las chispas de forma natural sin listarlas literalmente.
+    - Integra las chispas de forma natural sin listarlas literalmente, por ejemplo si una chispa es agua, podrías poner lluvia, un río, una cascada...
     ${instruccionSemilla}`;
 
     try {
@@ -435,8 +434,32 @@ function resolveTurnAnalysis(playerInput, aiData) {
 
     gameState.pendingResolution = { isSuccess, aiData };
     turnPending = true;
+    gameState.turnCount++;
+    checkAndAdvanceStage();
     setTimeout(() => { generateNextSeed(); }, 250);
     renderCodex(gameState);
+}
+
+function checkAndAdvanceStage() {
+    if (!gameState || !gameState.duration) return;
+    const currentStage = gameState.stageIndex;
+    const turnCount = gameState.turnCount || 0;
+    let shouldAdvance = false;
+    
+    if (gameState.duration === 'Cuento') {
+        shouldAdvance = turnCount > 0;
+    } else if (gameState.duration === 'Novela') {
+        shouldAdvance = turnCount > 0 && turnCount % 2 === 0;
+    } else if (gameState.duration === 'Microrelato') {
+        shouldAdvance = turnCount > 0 && turnCount % 3 === 0 && gameState.stageIndex < 6;
+    }
+    
+    if (shouldAdvance && gameState.stageIndex < etapasViaje.length - 1) {
+        gameState.stageIndex++;
+        const stageLabel = document.getElementById('currentStageDisplay');
+        if (stageLabel) stageLabel.innerText = `Etapa: ${gameState.stageIndex + 1}`;
+        showToast(`📖 Avanzas a: ${etapasViaje[gameState.stageIndex]}`, 'info');
+    }
 }
 
 async function generateNextSeed() {
@@ -519,11 +542,17 @@ function isAutoSaveEnabled() {
     return document.getElementById('autoSaveToggle')?.checked === true;
 }
 
+function askOracle() {
+    const options = ['No', 'No, pero...', 'Si, pero...', 'Si'];
+    const chosen = options[Math.floor(Math.random() * options.length)];
+    showToast(`🔮 Oráculo responde: ${chosen}`, 'info');
+}
+
 window.startGame = startGame;
 window.turnAI = turnAI;
 window.toggleRAG = () => toggleRAG(gameState);
 window.toggleDebug = toggleDebug;
-window.nextStage = () => nextStage(gameState);
+window.askOracle = askOracle;
 window.showHelp = showHelp;
 window.showMenu = showMenu;
 window.showSetupScreen = showSetupScreen;

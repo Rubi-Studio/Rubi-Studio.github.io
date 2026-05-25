@@ -260,10 +260,12 @@ export function showHelp(topic) {
         'estados': "Modificadores temporales (+1 o -1). Se generan tras cada turno y desaparecen cuando la IA te has incluido en tu historia.",
         'semilla': "Define cuánta libertad narrativa tienes. Inspirativa (5 palabras sueltas), Moderada (1 frase) o Escénica (La IA te plantea la escena).",
         'semilla_juego': "Tu inspiración para este turno. Usa esta premisa para continuar tu diario e intentar superar la dificultad.",
-        'etapa': "Las fases del Viaje del Héroe. Marcan el tono de la historia. Puedes avanzar cuando sientas que la trama lo pide.",
+        'etapa': "Las fases del Viaje del Héroe avanzan automáticamente según la duración elegida. Marca el tono de la historia.",
         'dificultad': "Número a igualar o superar. Escribe tu entrada integrando Tags, Estados e Inventario para que la suma alcance este número.",
         'inventario': "Objetos que encuentras en la aventura. Pueden usarse como +1 a la dificultad. Algunos se pierden o consumen con el uso.",
-        'rag': "La memoria del sistema. El Lore no cambia a menos que tú lo edites. El Resumen se condensa automáticamente con cada entrada."
+        'rag': "La memoria del sistema. El Lore no cambia a menos que tú lo edites. El Resumen se condensa automáticamente con cada entrada.",
+        'duracion': "Determina cuándo avanza la historia: Microrelato (saltos rápidos), Cuento (cada acción), Novela (cada 2 acciones).",
+        'oraculo': "No afecta nada a la trama, ni al sistema, pero cuando tengas que tomar una decisión que no tengas clara o prefieras dejarlo al destino, el oráculo te ayudará. Responderá: No, No pero..., Si pero..., o Si."
     };
     showPopup(helpTexts[topic] || "Ayuda no disponible.", 'info', 'Ayuda');
 }

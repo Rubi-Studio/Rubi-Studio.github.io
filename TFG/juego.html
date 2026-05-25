@@ -79,6 +79,14 @@
                 </select>
             </div>
             <div class="form-group">
+                <label>Duración de la Historia <span class="help-icon" onclick="showHelp('duracion')">ⓘ</span></label>
+                <select id="setupDuration">
+                    <option value="Microrelato">Microrelato (~15-30 min)</option>
+                    <option value="Cuento" selected>Cuento (~30-60 min)</option>
+                    <option value="Novela">Novela (~1-2 horas)</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label>Ambientación:</label>
                 <input type="text" id="setupSetting" value="Fantasía oscura en un reino nevado." />
             </div>
@@ -104,9 +112,9 @@
                 <div class="diary-panel">
                     <div class="system-controls">
                         <div class="stage-row">
-                            <span id="currentStageDisplay" class="stage-label">Etapa: 1</span>
-                            <span class="help-icon" onclick="showHelp('etapa')">ⓘ</span>
-                            <button class="mini-button" onclick="nextStage()">Avanzar Etapa</button>
+                            <span id="currentStageDisplay" class="stage-label hidden">Etapa: 1</span>
+                            <button class="oracle-button" onclick="askOracle()" title="Consulta el Oráculo para decisiones dudosas">🔮 Oráculo</button>
+                            <span class="help-icon" onclick="showHelp('oraculo')">ⓘ</span>
                         </div>
                         <button class="icon-button" onclick="toggleRAG()" title="Abrir Memoria del Mundo">📖 Memoria</button>
                     </div>
