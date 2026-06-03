@@ -7,8 +7,11 @@ export async function executeOpenAI(systemPrompt, payload, label = 'INTERACCIÓN
 
     console.log('🔒 Enviando solicitud al backend con modelo:', model);
 
-    // Permitir apuntar a un backend remoto (ej. Vercel) cuando el frontend esté en GitHub Pages
-    const backendBase = localStorage.getItem('hero_backend_url') || '';
+    // Si estamos fuera de Vercel, usar el backend estable de Vercel automáticamente.
+    const defaultBackendBase = 'https://eldiariodelheroe.vercel.app';
+    const savedBackend = localStorage.getItem('hero_backend_url');
+    const isVercelHost = window.location.host.endsWith('.vercel.app');
+    const backendBase = savedBackend || (isVercelHost ? '' : defaultBackendBase);
     const endpoint = backendBase ? `${backendBase.replace(/\/$/, '')}/api/openai` : '/api/openai';
 
     let response;
