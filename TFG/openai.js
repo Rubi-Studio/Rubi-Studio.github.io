@@ -3,13 +3,10 @@ import { updateDebugPanel } from './ui.js';
 const debugHistory = [];
 
 export async function executeOpenAI(systemPrompt, payload, label = 'INTERACCIÓN', meta = {}) {
-    // Nota: La API Key ahora se maneja en el servidor (/api/openai)
-    // No se expone en el frontend
-    
     const model = document.getElementById('modelSelect')?.value || 'gpt-4o-mini';
 
-    console.log('📤 Enviando solicitud al backend (/api/openai) con modelo:', model);
-    
+    console.log('🔒 Enviando solicitud al backend (/api/openai) con modelo:', model);
+
     let response;
     try {
         response = await fetch('/api/openai', {

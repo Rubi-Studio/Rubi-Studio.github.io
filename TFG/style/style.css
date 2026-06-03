@@ -418,6 +418,45 @@ footer {
     color: var(--text-darkenned);
 }
 
+.mode-indicator {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+}
+
+.mode-indicator.backend-mode {
+    background: #c8e6c9;
+    color: #1b5e20;
+    border-left: 4px solid #1b5e20;
+}
+
+.mode-indicator.local-mode {
+    background: #fff9c4;
+    color: #f57f17;
+    border-left: 4px solid #f57f17;
+}
+
+.api-config input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.api-config label:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.api-config input:disabled {
+    background: #e0e0e0;
+    cursor: not-allowed;
+}
+
 .api-config input,
 .api-config select {
     width: 100%;
