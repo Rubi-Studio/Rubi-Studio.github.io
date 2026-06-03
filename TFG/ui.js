@@ -40,8 +40,7 @@ function createSaveId() {
 
 export function checkApiKey() {
     const config = document.getElementById('apiConfig');
-    // Siempre ocultamos el input de clave (el backend gestiona la API Key)
-    if (config) config.style.display = 'none';
+    if (localStorage.getItem('hero_api_key') && config) config.style.display = 'none';
     restoreModelSelection();
 }
 
@@ -49,11 +48,14 @@ export function showApiConfig() {
     const d = document.getElementById('apiConfig');
     if (!d) return;
     d.style.display = d.style.display === 'none' ? 'flex' : 'none';
+    document.getElementById('apiKey').value = localStorage.getItem('hero_api_key') || '';
     restoreModelSelection();
 }
 
 export function saveApiKey() {
-    // Esta función ahora solo guarda la selección de modelo en localStorage
+    const k = document.getElementById('apiKey').value.trim();
+    if (!k) return;
+    localStorage.setItem('hero_api_key', k);
     const modelSelect = document.getElementById('modelSelect');
     if (modelSelect) {
         localStorage.setItem('hero_model', modelSelect.value);
