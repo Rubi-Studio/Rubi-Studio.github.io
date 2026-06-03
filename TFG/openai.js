@@ -5,11 +5,15 @@ const debugHistory = [];
 export async function executeOpenAI(systemPrompt, payload, label = 'INTERACCIÓN', meta = {}) {
     const model = document.getElementById('modelSelect')?.value || 'gpt-4o-mini';
 
-    console.log('🔒 Enviando solicitud al backend (/api/openai) con modelo:', model);
+    console.log('🔒 Enviando solicitud al backend con modelo:', model);
+
+    // Permitir apuntar a un backend remoto (ej. Vercel) cuando el frontend esté en GitHub Pages
+    const backendBase = localStorage.getItem('hero_backend_url') || '';
+    const endpoint = backendBase ? `${backendBase.replace(/\/$/, '')}/api/openai` : '/api/openai';
 
     let response;
     try {
-        response = await fetch('/api/openai', {
+        response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ systemPrompt, payload, model })
