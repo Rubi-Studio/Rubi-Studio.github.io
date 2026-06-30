@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --bg: #edeec9;
+            --surface: #77bfa3;
+            --primary: #98c9a3;
+            --accent: #69b578;
+            --highlight: #bfd8bd;
+            --text: #282a2f;
+            --text-darkenned: #181d27;
+        }
+
+        body {
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid var(--accent);
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        h2 {
+            color: var(--text-darkenned);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100% !important;
+            height: auto !important;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Diagrama de Estructura de Archivos</h2>
+    <div class="mermaid">
+    %%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#181d27', 'lineColor': '#69b578', 'fontFamily': 'Segoe UI', 'nodesep': 30, 'ranksep': 40}}}%%
+    graph TD
+        classDef folder fill:#edeec9,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef file fill:#98c9a3,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef helper fill:#bfd8bd,stroke:#77bfa3,stroke-width:2px,color:#181d27;
+
+        ROOT[TFG/]:::folder
+        API["api/openai.js\nBackend seguro"]:::file
+        INDEX["index.html\nLanding"]:::file
+        GAME["game/\nJuego y lógica"]:::folder
+        GAME_PAGE["juego.html\nJuego interactivo"]:::file
+        GAME_SCRIPTS["scripts/\nLógica del juego"]:::folder
+        MAIN["main.js\nControl principal"]:::file
+        UI["ui.js\nInterfaz y guardado"]:::file
+        OPENAI["openai.js\nComunicación IA"]:::file
+        UTILS["utils.js\nFunciones y datos"]:::file
+        VALID["validation.js\nValidación de entrada"]:::file
+        STYLE["Style/\nEstilos globales"]:::folder
+        ASSETS["assets/\nMultimedia y sonido"]:::folder
+        COMPONENTS["components/\nPartials HTML"]:::folder
+        HEADER["header.html\nCabecera compartida"]:::file
+        FOOTER["footer.html\nPie compartido"]:::file
+
+        ROOT --> API
+        ROOT --> INDEX
+        ROOT --> GAME
+        ROOT --> STYLE
+        ROOT --> ASSETS
+        ROOT --> COMPONENTS
+
+        GAME --> GAME_PAGE
+        GAME --> GAME_SCRIPTS
+        GAME --> ASSETS
+        GAME_SCRIPTS --> MAIN
+        GAME_SCRIPTS --> UI
+        GAME_SCRIPTS --> OPENAI
+        GAME_SCRIPTS --> UTILS
+        GAME_SCRIPTS --> VALID
+        COMPONENTS --> HEADER
+        COMPONENTS --> FOOTER
+
+        INDEX --> COMPONENTS
+        INDEX --> STYLE
+    </div>
+</div>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+        startOnLoad: true,
+        flowchart: { 
+            curve: 'basis',
+            padding: 10
+        }
+    });
+</script>
+
+</body>
+</html>

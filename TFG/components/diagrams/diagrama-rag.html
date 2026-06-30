@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --bg: #edeec9;
+            --surface: #77bfa3;
+            --primary: #98c9a3;
+            --accent: #69b578;
+            --highlight: #bfd8bd;
+            --text: #282a2f;
+            --text-darkenned: #181d27;
+        }
+
+        body {
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid var(--accent);
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        h2 {
+            color: var(--text-darkenned);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100% !important;
+            height: auto !important;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Diagrama RAG: Flujo de Memoria y Almacenamiento</h2>
+    <div class="mermaid">
+    %%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#181d27', 'lineColor': '#69b578', 'fontFamily': 'Segoe UI', 'nodesep': 30, 'ranksep': 45}}}%%
+    graph TD
+        classDef cliente fill:#edeec9,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef memoria fill:#98c9a3,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef servidor fill:#bfd8bd,stroke:#77bfa3,stroke-width:2px,color:#181d27;
+        classDef llm fill:#77bfa3,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef storage fill:#fff2cc,stroke:#f0c419,stroke-width:2px,color:#181d27;
+
+        subgraph Frontend [FRONTEND / Juego en el Navegador]
+            Input[Usuario escribe acción]:::cliente
+            State[gameState: memoria activa]:::memoria
+            Payload[Construye payload RAG]:::cliente
+        end
+
+        subgraph Backend [BACKEND / Vercel]
+            API[API / proxy OpenAI]:::servidor
+        end
+
+        subgraph OpenAI [IA / LLM]
+            LLM[Modelo GPT]:::llm
+        end
+
+        subgraph Persistencia [Almacenamiento en Navegador]
+            LocalSave[localStorage]:::storage
+            SaveIndex[hero_save_index + hero_save_*]:::storage
+        end
+
+        Input --> Payload
+        State --> Payload
+        Payload --> API
+        API --> LLM
+        LLM --> API
+        API --> State
+        State --> LocalSave
+        State --> SaveIndex
+
+        %% detalles de memoria
+        State ---|"Incluye lore, resumen, personajes, lugares, tags, estados, inventario, diario"| StateInfo[Memoria RAG en gameState]:::memoria
+        LocalSave -.->|"Persistencia opcional de partidas"| SaveIndex
+
+        style Frontend fill:none,stroke:#69b578,stroke-width:1px,stroke-dasharray: 5 5
+        style Backend fill:none,stroke:#77bfa3,stroke-width:1px,stroke-dasharray: 5 5
+        style OpenAI fill:none,stroke:#98c9a3,stroke-width:1px,stroke-dasharray: 5 5
+        style Persistencia fill:none,stroke:#f0c419,stroke-width:1px,stroke-dasharray: 5 5
+    </div>
+</div>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+        startOnLoad: true,
+        flowchart: { 
+            curve: 'basis',
+            padding: 10
+        }
+    });
+</script>
+
+</body>
+</html>
