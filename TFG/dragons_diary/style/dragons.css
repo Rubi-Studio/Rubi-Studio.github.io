@@ -1,0 +1,130 @@
+:root {
+    --bg: #0b0f14;
+    --surface: #111316;
+    --primary: #16202a;
+    --accent: #b86c1a;
+    --highlight: #2a2f34;
+    --text: #e6e6e6;
+    --text-darkenned: #cfd8dc;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+main {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+}
+
+h1 {
+    color: var(--text-darkenned);
+    margin-bottom: 0.5rem;
+}
+
+p {
+    max-width: 600px;
+    margin: 0.5rem 0;
+    color: var(--text-darkenned);
+}
+
+.cta-button {
+    display: inline-block;
+    padding: 15px 30px;
+    background-color: #3b2a1a;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1.2em;
+    transition: background 0.3s;
+}
+
+.cta-button:hover {
+    background-color: #2b1e13;
+}
+
+/* Reuse many of the original game styles but with darker visuals */
+.game-wrapper {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+/* Secret decor square to unlock debug: small decorative clickable square */
+.secret-decor {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg,#3b2a1a,#5a3b20);
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.menu-screen,
+#menuScreen {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.6);
+    margin-bottom: 20px;
+}
+
+.menu-subtitle {
+    color: #bdbdbd;
+    margin-top: 10px;
+}
+
+.menu-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.save-item { background: #0f1316; border: 1px solid rgba(255,255,255,0.03); color: var(--text); }
+
+.save-empty { background: rgba(255,255,255,0.02); color: #999; }
+
+.game-actions button.secondary-button { background: rgba(255,255,255,0.03); color: var(--text); border-color: rgba(255,255,255,0.04); }
+
+.primary-button { background: linear-gradient(135deg, var(--accent), #e8a44d); color: #111; }
+
+.diary-panel .persistent-diary { background: #0d1113; color: #ddd; border: 1px solid rgba(255,255,255,0.03); }
+
+.diary-input { background: #0b0f12; color: var(--text); border: 1px solid rgba(255,255,255,0.04); }
+
+.btn-send { background: var(--accent); color: #111; }
+
+.tag-box { background: rgba(184,108,26,0.12); color: var(--text); }
+
+.status-box.status-positive { border-color: #6db96d; color: #aee3a1; }
+.status-box.status-negative { border-color: #cf6b6b; color: #f3b7b7; }
+
+.popup-overlay { background: rgba(0,0,0,0.7); }
+.popup-card { background: #0b1014; border: 1px solid rgba(255,255,255,0.03); }
+.popup-header { background: #2b1e13; }
+
+@media (max-width: 960px) {
+    .game-screen .game-columns { flex-direction: column; }
+}
