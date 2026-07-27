@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --bg: #edeec9;
+            --surface: #77bfa3;
+            --primary: #98c9a3;
+            --accent: #69b578;
+            --highlight: #bfd8bd;
+            --text: #282a2f;
+            --text-darkenned: #181d27;
+        }
+
+        body {
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid var(--accent);
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        h2 {
+            color: var(--text-darkenned);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+        }
+
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+        .mermaid svg {
+            max-width: 100% !important;
+            height: auto !important;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Actualización del RAG: Flujo, Criterios y Almacenamiento</h2>
+    <div class="mermaid">
+    %%{init: {'theme': 'base', 'themeVariables': { 'primaryTextColor': '#181d27', 'lineColor': '#69b578', 'fontFamily': 'Segoe UI', 'nodesep': 25, 'ranksep': 40}}}%%
+    graph TD
+        classDef entrada fill:#edeec9,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef procesar fill:#98c9a3,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef criterio fill:#bfd8bd,stroke:#77bfa3,stroke-width:2px,color:#181d27;
+        classDef actualizar fill:#77bfa3,stroke:#69b578,stroke-width:2px,color:#181d27;
+        classDef almacen fill:#fff2cc,stroke:#f0c419,stroke-width:2px,color:#181d27;
+
+        subgraph Entrada [ENTRADA - Turno del Jugador]
+            PlayerInput[Entrada de Diario del Jugador]:::entrada
+            AIAnalysis["IA Analiza:<br/>- Tags usados<br/>- Personajes mencionados<br/>- Lugares descubiertos<br/>- Resumen del turno"]:::procesar
+        end
+
+        subgraph Criterios [CRITERIOS DE ACTUALIZACIÓN]
+            CritLore["LORE: Se actualiza si...<br/>- Hay nuevos personajes<br/>- Hay nuevos lugares<br/>- Hay eventos significativos"]:::criterio
+            CritResumen["RESUMEN: Se condensa si...<br/>- Longitud acumulada >500 palabras<br/>- Cada vez que hay salto de etapa<br/>- El jugador lo edita manualmente"]:::criterio
+            CritDiary["DIARIO: Siempre se añade<br/>- Cada entrada del jugador se guarda<br/>- Incluye resultado del turno<br/>- Timestamp automático"]:::criterio
+        end
+
+        subgraph Proceso [PROCESO DE ACTUALIZACIÓN EN MEMORIA]
+            ExtractInfo["Extrae del análisis IA:<br/>- personajes mencionados<br/>- lugares descubiertos<br/>- resumen_turno"]:::actualizar
+            UpdateLore["Lore += 'Nuevo: ' + eventos<br/>Preserva todo lo anterior<br/>No elimina, solo añade"]:::actualizar
+            UpdateResumen["Resumen condensado por IA<br/>Mantiene eventos clave<br/>Máx 300 palabras"]:::actualizar
+            AddDiary["Entrada ← {<br/>turno, entrada, resultado,<br/>tags_usados, personajes_nuevos<br/>}"]:::actualizar
+        end
+
+        subgraph Almacenamiento [ALMACENAMIENTO - localStorage del Navegador]
+            LocalStorage["localStorage<br/>'hero_save_[id]'"]:::almacen
+            LoreFile["gameState.lore<br/>(texto íntegro, sin límite)"]:::almacen
+            ResumenFile["gameState.summary<br/>(máx 300 palabras condensadas)"]:::almacen
+            DiarioFile["gameState.diaryEntries<br/>(array de objetos)"]:::almacen
+            IndexFile["hero_save_index<br/>(lista de partidas guardadas)"]:::almacen
+        end
+
+        PlayerInput --> AIAnalysis
+        AIAnalysis --> CritLore
+        AIAnalysis --> CritResumen
+        AIAnalysis --> CritDiary
+        
+        CritLore --> ExtractInfo
+        CritResumen --> UpdateResumen
+        CritDiary --> AddDiary
+        
+        ExtractInfo --> UpdateLore
+        UpdateLore --> LocalStorage
+        UpdateResumen --> LocalStorage
+        AddDiary --> LocalStorage
+        
+        LocalStorage --> LoreFile
+        LocalStorage --> ResumenFile
+        LocalStorage --> DiarioFile
+        LocalStorage --> IndexFile
+
+        style Entrada fill:#f0f0f0,stroke:#69b578
+        style Criterios fill:#f0f0f0,stroke:#69b578
+        style Proceso fill:#f0f0f0,stroke:#69b578
+        style Almacenamiento fill:#f0f0f0,stroke:#69b578
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+    mermaid.contentLoaderFunc = () => {};
+    mermaid.initialize({ startOnLoad: true, theme: 'base', securityLevel: 'loose' });
+    mermaid.run();
+</script>
+
+</body>
+</html>
