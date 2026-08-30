@@ -1,7 +1,11 @@
 import { etapasViaje, RANDOM_DATA } from './utils.js';
 
-const SAVE_INDEX_KEY = 'hero_save_index';
-const SAVE_KEY_PREFIX = 'hero_save_';
+function getStorageNamespace() {
+    return document.body?.dataset?.game === 'dragon' ? 'dragon' : 'hero';
+}
+
+const SAVE_INDEX_KEY = () => `${getStorageNamespace()}_save_index`;
+const SAVE_KEY_PREFIX = () => `${getStorageNamespace()}_save_`;
 
 function formatTimestamp(value) {
     const date = new Date(value);
@@ -21,7 +25,7 @@ function downloadFile(filename, contents, mimeType) {
 }
 
 function getSavedGames() {
-    const raw = localStorage.getItem(SAVE_INDEX_KEY);
+    const raw = localStorage.getItem(SAVE_INDEX_KEY());
     if (!raw) return [];
     try {
         return JSON.parse(raw);
@@ -31,7 +35,7 @@ function getSavedGames() {
 }
 
 function persistSavedGames(list) {
-    localStorage.setItem(SAVE_INDEX_KEY, JSON.stringify(list));
+    localStorage.setItem(SAVE_INDEX_KEY(), JSON.stringify(list));
 }
 
 function createSaveId() {
@@ -80,15 +84,30 @@ export function restoreModelSelection() {
 }
 
 export function randomizeSetup() {
-    const d = document.querySelector('#setupScreen') ? RANDOM_DATA : null;
-    const data = d || null;
+    const setup = document.getElementById('setupScreen');
+    const data = setup ? RANDOM_DATA : null;
     if (!data) return;
 
-    document.getElementById('setupName').value = data.names[Math.floor(Math.random() * data.names.length)];
-    document.getElementById('setupOrigin').value = data.origins[Math.floor(Math.random() * data.origins.length)];
-    document.getElementById('setupMot').value = data.motivations[Math.floor(Math.random() * data.motivations.length)];
-    document.getElementById('setupFlaw').value = data.flaws[Math.floor(Math.random() * data.flaws.length)];
-    document.getElementById('setupSetting').value = data.settings[Math.floor(Math.random() * data.settings.length)];
+    const setupName = document.getElementById('setupName');
+    const setupOrigin = document.getElementById('setupOrigin');
+    const setupFlaw = document.getElementById('setupFlaw');
+    const setupCompetence = document.getElementById('setupCompetence');
+    const setupCharacteristic = document.getElementById('setupCharacteristic');
+    const setupSetting = document.getElementById('setupSetting');
+
+    const names = Array.isArray(data.names) && data.names.length ? data.names : ['Azhul'];
+    const origins = Array.isArray(data.origins) && data.origins.length ? data.origins : ['Hogar en la Montaña Crematoria'];
+    const flaws = Array.isArray(data.flaws) && data.flaws.length ? data.flaws : ['Corrupción'];
+    const settings = Array.isArray(data.settings) && data.settings.length ? data.settings : ['Torres encantadas, niebla y hechizos protectores.'];
+    const competenceOptions = ['Conocimiento antiguo', 'Traductor', 'Afinidad mágica', 'Visión de las estrellas', 'Dominio de los relictos'];
+    const characteristicOptions = ['Filántropo', 'Amable', 'Atento', 'Sereno', 'Generoso'];
+
+    if (setupName) setupName.value = names[Math.floor(Math.random() * names.length)];
+    if (setupOrigin) setupOrigin.value = origins[Math.floor(Math.random() * origins.length)];
+    if (setupFlaw) setupFlaw.value = flaws[Math.floor(Math.random() * flaws.length)];
+    if (setupCompetence) setupCompetence.value = competenceOptions[Math.floor(Math.random() * competenceOptions.length)];
+    if (setupCharacteristic) setupCharacteristic.value = characteristicOptions[Math.floor(Math.random() * characteristicOptions.length)];
+    if (setupSetting) setupSetting.value = settings[Math.floor(Math.random() * settings.length)];
 }
 
 export function showMenu() {
@@ -152,7 +171,7 @@ export function saveGameState(gameState, title) {
         updated: new Date().toISOString()
     };
     const record = { meta, gameState: { ...gameState, saveId } };
-    localStorage.setItem(`${SAVE_KEY_PREFIX}${saveId}`, JSON.stringify(record));
+    localStorage.setItem(`${SAVE_KEY_PREFIX()}${saveId}`, JSON.stringify(record));
     persistSavedGames([meta, ...list.filter(item => item.id !== saveId)]);
     renderSaveList();
     return saveId;
@@ -160,13 +179,13 @@ export function saveGameState(gameState, title) {
 
 export function deleteSavedGame(saveId) {
     const list = getSavedGames().filter(item => item.id !== saveId);
-    localStorage.removeItem(`${SAVE_KEY_PREFIX}${saveId}`);
+    localStorage.removeItem(`${SAVE_KEY_PREFIX()}${saveId}`);
     persistSavedGames(list);
     renderSaveList();
 }
 
 export function loadSavedGame(saveId) {
-    const raw = localStorage.getItem(`${SAVE_KEY_PREFIX}${saveId}`);
+    const raw = localStorage.getItem(`${SAVE_KEY_PREFIX()}${saveId}`);
     if (!raw) return null;
     try {
         return JSON.parse(raw);
@@ -254,21 +273,42 @@ export function nextStage(gameState) {
     renderCodex(gameState);
 }
 
+export function showInfoTutorial() {
+    const message = `
+        <strong class="help-highlight">Tutorial de ayuda</strong><br><br>
+        <strong>1.</strong> Los iconos <strong>ⓘ</strong> abren explicaciones rápidas de cada bloque.<br>
+        <strong>2.</strong> La <strong>Dificultad</strong> indica el número mínimo que debes superar con tus rasgos, estados y decisiones.<br>
+        <strong>3.</strong> La <strong>Semilla</strong> marca la inspiración del siguiente turno, pero tú sigues escribiendo la historia.<br>
+        <strong>4.</strong> El <strong>Oráculo</strong> te resuelve una duda cuando no sabes por dónde continuar.<br>
+        <strong>5.</strong> La <strong>Memoria</strong> guarda el lore y el resumen para que la IA mantenga coherencia.
+    `;
+    showPopup(message, 'info', 'Tutorial de ayuda');
+}
+
 export function showHelp(topic) {
     const helpTexts = {
-        'tags': "Rasgos inherentes de tu personaje. Su nivel (1-5) se suma a la tirada si los usas en la narración. Bajan de nivel al usarlos, suben si los ignoras.",
-        'estados': "Modificadores temporales (+1 o -1). Se generan tras cada turno y desaparecen cuando la IA te has incluido en tu historia.",
-        'semilla': "Define cuánta libertad narrativa tienes. Inspirativa (5 palabras sueltas), Moderada (1 frase) o Escénica (La IA te plantea la escena).",
-        'semilla_juego': "Tu inspiración para este turno. Usa esta premisa para continuar tu diario e intentar superar la dificultad.",
-        'etapa': "Las fases del Viaje del Héroe avanzan automáticamente según la duración elegida. Marca el tono de la historia.",
-        'dificultad': "Número a igualar o superar. Escribe tu entrada integrando Tags, Estados e Inventario para que la suma alcance este número.",
-        'habilidades': "Ataques especiales del dragón (Llamarada, Encantar, Volar) con recarga. La utilidad de cada habilidad vale 1-3 puntos según cómo la uses: 1 = uso marginal (ej: Llamarada para encender un cigarro), 2 = uso moderado, 3 = impactante y narrativamente poderoso (ej: quemar toda la torre del mago). La IA evalúa cada uso.",
-        'inventario': "Objetos que encuentras en la aventura. Pueden usarse como +1 a la dificultad. Algunos se pierden o consumen con el uso.",
+        'tags': "Rasgos inherentes de tu personaje. Su nivel (1-5) suma a la tirada si los usas en la narración; bajan al usarlos y suben si los ignoras.",
+        'estados': "Modificadores temporales (+1 o -1). Surgen tras cada turno y desaparecen cuando la IA te ha incluido en tu historia.",
+        'semilla': "Define cuánta libertad narrativa tienes. Inspirativa (5 palabras sueltas), Moderada (1 frase) o Escénica (la IA plantea la escena).",
+        'semilla_juego': "Tu inspiración para este turno. Usa esta premisa para continuar el diario e intentar superar la dificultad.",
+        'etapa': "Las fases del Viaje del Héroe avanzan automáticamente según la duración elegida. Marcan el tono de la historia.",
+        'dificultad': "Número a igualar o superar. Escribe tu entrada integrando Tags, Estados e Inventario para que la suma alcance este valor.",
+        'habilidades': "Ataques especiales del dragón (Llamarada, Encantar, Volar) con recarga. La utilidad de cada habilidad vale 1-3 puntos según cómo la uses: 1 = marginal, 2 = moderado, 3 = impactante y narrativamente poderoso. La IA evalúa cada uso.",
+        'inventario': "Objetos que encuentras en la aventura. Pueden sumar +1 a la dificultad y algunos se consumen o pierden con el uso.",
         'rag': "La memoria del sistema. El Lore no cambia a menos que tú lo edites. El Resumen se condensa automáticamente con cada entrada.",
         'duracion': "Determina cuándo avanza la historia: Microrelato (saltos rápidos), Cuento (cada acción), Novela (cada 2 acciones).",
-        'oraculo': "No afecta nada a la trama, ni al sistema, pero cuando tengas que tomar una decisión que no tengas clara o prefieras dejarlo al destino, el oráculo te ayudará. Responderá: No, No pero..., Si pero..., o Si."
+        'oraculo': "No afecta a la trama ni al sistema, pero cuando tengas que decidir y no estés seguro, el oráculo te ayudará. Responderá: No, No pero..., Si pero..., o Si."
     };
-    showPopup(helpTexts[topic] || "Ayuda no disponible.", 'info', 'Ayuda');
+
+    if (!topic) {
+        showInfoTutorial();
+        return;
+    }
+
+    const label = topic === 'semilla' ? 'Semilla' : topic === 'dificultad' ? 'Dificultad' : topic === 'oraculo' ? 'Oráculo' : 'Ayuda';
+    const content = helpTexts[topic] || 'Ayuda no disponible.';
+    showPopup(`<strong class="help-highlight">${label}</strong><br><br>${content}`, 'info', 'Ayuda');
+    playUiSound('info');
 }
 
 export function showPopup(message, type = 'info', title = 'Aviso') {
@@ -277,7 +317,7 @@ export function showPopup(message, type = 'info', title = 'Aviso') {
     const popupMessage = document.getElementById('popupMessage');
     if (!overlay || !popupTitle || !popupMessage) return;
     popupTitle.innerText = title;
-    popupMessage.innerText = message;
+    popupMessage.innerHTML = typeof message === 'string' ? message.replace(/\n/g, '<br>') : message;
     overlay.className = `popup-overlay popup-${type}`;
     overlay.style.display = 'flex';
 }
@@ -296,6 +336,77 @@ function createToastContainer() {
         document.body.appendChild(container);
     }
     return container;
+}
+
+const SOUND_PROFILES = {
+    hover: { type: 'triangle', frequency: 520, duration: 0.06, volume: 0.025, sweep: 70 },
+    button: { type: 'square', frequency: 660, duration: 0.08, volume: 0.035, sweep: 110 },
+    start: { type: 'sawtooth', frequency: 820, duration: 0.12, volume: 0.05, sweep: 200 },
+    submit: { type: 'sawtooth', frequency: 420, duration: 0.14, volume: 0.045, sweep: 160 },
+    processed: { type: 'triangle', frequency: 780, duration: 0.18, volume: 0.04, sweep: 220 },
+    warning: { type: 'sawtooth', frequency: 260, duration: 0.2, volume: 0.05, sweep: 140 },
+    info: { type: 'triangle', frequency: 610, duration: 0.09, volume: 0.03, sweep: 90 }
+};
+
+export function playUiSound(kind = 'button') {
+    const profile = SOUND_PROFILES[kind] || SOUND_PROFILES.button;
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtor) return;
+
+    if (!playUiSound.context) {
+        playUiSound.context = new AudioCtor();
+    }
+
+    const ctx = playUiSound.context;
+    if (ctx.state === 'suspended') {
+        ctx.resume();
+    }
+
+    const now = ctx.currentTime;
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    oscillator.type = profile.type;
+    oscillator.frequency.setValueAtTime(profile.frequency, now);
+    oscillator.frequency.linearRampToValueAtTime(profile.frequency + profile.sweep, now + profile.duration);
+    gainNode.gain.setValueAtTime(profile.volume, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    oscillator.start(now);
+    oscillator.stop(now + profile.duration);
+}
+
+export function registerUiSoundBindings() {
+    const buttons = document.querySelectorAll('button, .icon-button, .secondary-button, .btn-start, .btn-send, .mini-button');
+    buttons.forEach((button) => {
+        if (button.dataset.soundBound === 'true') return;
+        button.dataset.soundBound = 'true';
+        if (button.id === 'debugToggleButton') return;
+        button.addEventListener('pointerover', () => playUiSound('hover'), { passive: true });
+        button.addEventListener('click', () => {
+            playUiSound(button.classList.contains('btn-start') ? 'start' : 'button');
+        });
+    });
+
+    const sendBtn = document.getElementById('sendBtn');
+    if (sendBtn) {
+        sendBtn.addEventListener('click', () => playUiSound('submit'));
+    }
+
+    const helpIcons = document.querySelectorAll('.help-icon');
+    helpIcons.forEach((icon) => {
+        icon.addEventListener('click', () => playUiSound('info'));
+    });
+
+    const playerText = document.getElementById('playerText');
+    if (playerText) {
+        playerText.addEventListener('keydown', (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                playUiSound('submit');
+            }
+        });
+    }
 }
 
 export function showToast(message, type = 'info', duration = 2200) {
@@ -344,7 +455,7 @@ export function renderCodex(gameState) {
             invBox.innerHTML = `<span class="placeholder-text">Sin habilidades</span>`;
         } else {
             gameState.abilities.forEach((a, idx) => {
-                const readyText = a.readyIn && a.readyIn > 0 ? `(Cool ${a.readyIn})` : '(Lista)';
+                const readyText = a.readyIn && a.readyIn > 0 ? `⧖ ${a.readyIn}` : '✓ Lista';
                 invBox.innerHTML += `<div class="inv-item ability-item" title="Índice ${idx}">${a.name} ${readyText}</div>`;
             });
         }

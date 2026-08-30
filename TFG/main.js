@@ -7,6 +7,29 @@ let gameState = {};
 let gameReady = false;
 let turnPending = false;
 
+function getDraftStorageKey() {
+    return `draft_${document.body?.dataset?.game || 'hero'}_text`;
+}
+
+function saveDraftText() {
+    const text = document.getElementById('playerText')?.value ?? '';
+    localStorage.setItem(getDraftStorageKey(), text);
+}
+
+function loadDraftText() {
+    const saved = localStorage.getItem(getDraftStorageKey()) || '';
+    const textarea = document.getElementById('playerText');
+    if (textarea && saved) {
+        textarea.value = saved;
+    }
+}
+
+function clearDraftText() {
+    localStorage.removeItem(getDraftStorageKey());
+    const textarea = document.getElementById('playerText');
+    if (textarea) textarea.value = '';
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     console.log('✓ main.js cargado correctamente');
     console.log('✓ DOMContentLoaded dispuesto');
@@ -28,6 +51,12 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const playerText = document.getElementById('playerText');
+    if (playerText) {
+        loadDraftText();
+        playerText.addEventListener('input', saveDraftText);
+    }
+
     window.addEventListener('keydown', (event) => {
         if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
             event.preventDefault();
@@ -44,7 +73,7 @@ async function startGame() {
         name: document.getElementById('setupName').value,
         setting: document.getElementById('setupSetting').value,
         seedLevel: document.getElementById('setupSeedLevel').value,
-        duration: document.getElementById('setupDuration').value,
+        duration: 'Microrelato',
         stageIndex: 0,
         turnCount: 0,
         tags: [],
@@ -62,8 +91,6 @@ async function startGame() {
 
     const playerName = gameState.name;
     gameState.characters[playerName] = { role: 'Protagonista', trait: document.getElementById('setupFlaw').value || 'Neutral' };
-    const initialItem = document.getElementById('setupItem')?.value.trim();
-    if (initialItem) gameState.inventory.push(initialItem);
     document.getElementById('diaryDisplay').innerHTML = '';
     gameReady = false;
 
@@ -83,19 +110,14 @@ async function validateAndEnrichSetup() {
         origen: document.getElementById('setupOrigin').value,
         motivacion: document.getElementById('setupMot').value,
         defecto: document.getElementById('setupFlaw').value,
-        ambientacion: gameState.setting,
-        objeto_inicial: document.getElementById('setupItem')?.value.trim() || null
+        ambientacion: gameState.setting
     };
 
-    const prompt = `Valida y sintetiza brevemente el setup del personaje. Si el objeto inicial no existe, indica objeto_valido: false. RESPONDE SOLO JSON:\n    {"lore_inicial": "1-2 líneas de lore basado en origen+ambientación", "objeto_valido": true/false}`;
+    const prompt = `Valida y sintetiza brevemente el setup del personaje. RESPONDE SOLO JSON:\n    {"lore_inicial": "1-2 líneas de lore basado en origen+ambientación"}`;
 
     try {
         const enrichedResponse = await executeOpenAI(prompt, setupData, 'VALIDACIÓN DE SETUP');
         if (enrichedResponse.lore_inicial) gameState.lore = enrichedResponse.lore_inicial;
-        const objectProvided = typeof setupData.objeto_inicial === 'string' && setupData.objeto_inicial.trim().length > 0;
-        if (objectProvided && enrichedResponse.objeto_valido === true) {
-            gameState.inventory = [setupData.objeto_inicial];
-        }
         console.log('✓ Setup validado por IA');
     } catch (e) {
         console.warn('Validación de setup falló, continuando con valores por defecto:', e);
@@ -114,8 +136,7 @@ async function generateInitialSeed() {
             origen: document.getElementById('setupOrigin').value,
             motivacion: document.getElementById('setupMot').value,
             defecto: document.getElementById('setupFlaw').value,
-            ambientacion: gameState.setting,
-            objeto_inicial: document.getElementById('setupItem')?.value.trim() || null
+            ambientacion: gameState.setting
         },
         etapa: etapasViaje[gameState.stageIndex],
         nivel_semilla: gameState.seedLevel,
@@ -126,7 +147,7 @@ async function generateInitialSeed() {
     Debes responder SOLO con JSON válido EXACTO:\n    {"tagsIniciales": [{"name":"...", "level":3}], "nueva_semilla": "..."}
     - tagsIniciales debe contener EXACTAMENTE 3 objetos.
     - Cada tag debe tener level: 3 y name corto (1 a 3 palabras).
-    - Solo usa características del personaje para crear tags: motivación, defecto, origen, objeto inicial y aspectos clave del nombre si son rasgos.
+    - Solo usa características del personaje para crear tags: motivación, defecto, origen y aspectos clave del nombre si son rasgos.
     - No uses la ambientación como tag ni la conviertas en un rasgo.
     - No uses la etapa narrativa, el nombre del personaje ni frases completas como nombre de tag.
     - Si el jugador describe un rasgo largo o muy específico, simplifica conservando el concepto real (por ejemplo "Paladín de la Iglesia de la diosa Pharah" puede ser "Paladín").
@@ -266,6 +287,7 @@ function loadSaveData(record) {
 function newDiary() {
     gameState = {};
     gameReady = false;
+    clearDraftText();
     const diaryDisplay = document.getElementById('diaryDisplay');
     if (diaryDisplay) diaryDisplay.innerHTML = '';
     showSetupScreen();
@@ -338,11 +360,8 @@ async function turnAI() {
     try {
         const aiResponse = await executeOpenAI(prompt, payload, 'ANÁLISIS DE TURNO');
         if (aiResponse.inyeccion_detectada === true) {
-            showPopup('El Diario del Héroe es un juego de escritura creativa. Si bien es divertido romper el juego en sí, no se creó para este propósito. Si este mensaje ha salido por error, ignóralo; el juego continuará de forma normal.', 'warning', 'Intento de manipulación detectado');
-            document.getElementById('loading').style.display = 'none';
-            turnPending = false;
-            document.getElementById('sendBtn').disabled = false;
-            return;
+            showPopup('Intento de manipulación detectado, pero el juego continúa. Puedes seguir jugando aunque la IA haya avisado.', 'warning', 'Intento de manipulación detectado');
+            playUiSound('warning');
         }
         resolveTurnAnalysis(playerInput, aiResponse);
     } catch (e) {
@@ -421,6 +440,7 @@ function resolveTurnAnalysis(playerInput, aiData) {
         itemsLost
     });
     document.getElementById('playerText').value = '';
+    clearDraftText();
 
     const newSummary = gameState.summary + ' ' + (aiData.resumen_turno || '');
     gameState.summary = condenseSummary(newSummary, 300);
@@ -431,6 +451,7 @@ function resolveTurnAnalysis(playerInput, aiData) {
         evalText.classList.remove('result-success', 'result-fail');
         evalText.classList.add(isSuccess ? 'result-success' : 'result-fail');
     }
+    playUiSound('processed');
 
     gameState.pendingResolution = { isSuccess, aiData };
     turnPending = true;
@@ -442,10 +463,11 @@ function resolveTurnAnalysis(playerInput, aiData) {
 
 function checkAndAdvanceStage() {
     if (!gameState || !gameState.duration) return;
-    const currentStage = gameState.stageIndex;
     const turnCount = gameState.turnCount || 0;
     let shouldAdvance = false;
-    
+
+    if (gameState.freePlay) return;
+
     if (gameState.duration === 'Cuento') {
         shouldAdvance = turnCount > 0;
     } else if (gameState.duration === 'Novela') {
@@ -453,12 +475,20 @@ function checkAndAdvanceStage() {
     } else if (gameState.duration === 'Microrelato') {
         shouldAdvance = turnCount > 0 && turnCount % 3 === 0 && gameState.stageIndex < 6;
     }
-    
+
     if (shouldAdvance && gameState.stageIndex < etapasViaje.length - 1) {
         gameState.stageIndex++;
         const stageLabel = document.getElementById('currentStageDisplay');
         if (stageLabel) stageLabel.innerText = `Etapa: ${gameState.stageIndex + 1}`;
         showToast(`📖 Avanzas a: ${etapasViaje[gameState.stageIndex]}`, 'info');
+    }
+
+    if (gameState.stageIndex >= etapasViaje.length - 1 && !gameState.freePlay) {
+        const continueFreePlay = window.confirm('Has llegado al final de las etapas. ¿Quieres seguir jugando a lo libre?');
+        if (continueFreePlay) {
+            gameState.freePlay = true;
+            showToast('Modo libre activado: la historia sigue con libertad narrativa.', 'info');
+        }
     }
 }
 

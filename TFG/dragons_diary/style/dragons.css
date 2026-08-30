@@ -1,11 +1,14 @@
 :root {
-    --bg: #0b0f14;
-    --surface: #111316;
-    --primary: #16202a;
-    --accent: #b86c1a;
-    --highlight: #2a2f34;
-    --text: #e6e6e6;
-    --text-darkenned: #cfd8dc;
+    --bg: #0d1419;
+    --surface: #161d22;
+    --primary: #1e2a31;
+    --accent: #2fd394;
+    --highlight: #2d3a40;
+    --text: #edf3f7;
+    --text-darkenned: #d6e1e6;
+    --panel: #10181d;
+    --muted: #b9c4ca;
+    --text-on-accent: #111111;
 }
 
 *, *::before, *::after {
@@ -21,6 +24,7 @@ body {
     flex-direction: column;
     min-height: 100vh;
     line-height: 1.6;
+    letter-spacing: 0.01em;
 }
 
 main {
@@ -142,7 +146,7 @@ p {
 }
 
 .btn-start:hover {
-    background: #c9771f;
+    background: #1ea773;
 }
 
 .secondary-button,
@@ -201,7 +205,7 @@ p {
 }
 
 .btn-random:hover {
-    background: #c9771f;
+    background: #1ea773;
 }
 
 .oracle-button {
@@ -235,6 +239,34 @@ p {
     background: rgba(255, 255, 255, 0.08);
 }
 
+.debug-lock-button,
+.debug-ready-button {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid #cbb49c;
+    background: #ede1d0;
+    color: #1f1f1f;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.debug-lock-button {
+    background: #f3e3c2;
+    border-color: #c28a36;
+}
+
+.debug-ready-button {
+    background: #dfeaf7;
+    border-color: #4f7ebf;
+}
+
+.debug-lock-button:hover,
+.debug-ready-button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+}
+
 .btn-send {
     padding: 12px;
     background: var(--accent);
@@ -248,7 +280,7 @@ p {
 }
 
 .btn-send:hover {
-    background: #c9771f;
+    background: #1ea773;
 }
 
 .btn-send:disabled {
@@ -499,7 +531,7 @@ p {
 }
 
 .popup-button:hover {
-    background: #c9771f;
+    background: #1ea773;
 }
 
 /* Toast notifications */

@@ -1,12 +1,15 @@
 
 :root {
-    --bg: #edeec9;
-    --surface: #77bfa3;
-    --primary: #98c9a3;
-    --accent: #69b578;
-    --highlight: #bfd8bd;
-    --text: #282a2f;
-    --text-darkenned: #181d27;
+    --bg: #f3efe6;
+    --surface: #268e6b;
+    --primary: #24a370;
+    --accent: #c86d12;
+    --highlight: #dfead9;
+    --text: #183127;
+    --text-darkenned: #11231d;
+    --text-on-accent: #111827;
+    --panel: #ffffff;
+    --muted: #317c5a;
 }
 
 *, *::before, *::after {
@@ -22,6 +25,7 @@ body {
     flex-direction: column;
     min-height: 100vh;
     line-height: 1.6;
+    letter-spacing: 0.01em;
 }
 
 main {
@@ -94,7 +98,7 @@ header nav {
 }
 
 header nav a {
-    color: var(--text-darkenned);
+    color: #f5f5f0;
     padding: 0.4rem 0.6rem;
     border-radius: 6px;
     transition: all 0.2s ease;

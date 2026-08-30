@@ -1,16 +1,53 @@
 import { etapasViaje, getSeedInstruction, pickChispas, condenseSummary, normalizeTagObjects, normalizeInitialTagObjects } from './utils.js';
 import { validatePlayerInput, detectGameBreaking, validateAIAdherence } from './validation.js';
-import { randomizeSetup, toggleRAG, nextStage, showHelp, showMenu, showSetupScreen, showGameScreen, showPopup, closePopup, notify, showToast, renderCodex, saveGameState, loadSavedGame, deleteSavedGame, downloadSaveById, downloadDiaryById, renderSaveList } from './ui.js';
+import { randomizeSetup, toggleRAG, nextStage, showHelp, showInfoTutorial, showMenu, showSetupScreen, showGameScreen, showPopup, closePopup, notify, showToast, renderCodex, saveGameState, loadSavedGame, deleteSavedGame, downloadSaveById, downloadDiaryById, renderSaveList, registerUiSoundBindings, playUiSound } from './ui.js';
 import { executeOpenAI } from './openai.js';
 
 let gameState = {};
 let gameReady = false;
 let turnPending = false;
 
+function getDraftStorageKey() {
+    return `draft_${document.body?.dataset?.game || 'hero'}_text`;
+}
+
+function saveDraftText() {
+    const text = document.getElementById('playerText')?.value ?? '';
+    localStorage.setItem(getDraftStorageKey(), text);
+}
+
+function loadDraftText() {
+    const saved = localStorage.getItem(getDraftStorageKey()) || '';
+    const textarea = document.getElementById('playerText');
+    if (textarea && saved) {
+        textarea.value = saved;
+    }
+}
+
+function clearDraftText() {
+    localStorage.removeItem(getDraftStorageKey());
+    const textarea = document.getElementById('playerText');
+    if (textarea) textarea.value = '';
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     console.log('✓ main.js (dragons_diary) cargado correctamente');
     renderSaveList();
+    registerUiSoundBindings();
+    updateDebugButtonState();
     randomizeSetup();
+    const menuScreen = document.getElementById('menuScreen');
+    const setupScreen = document.getElementById('setupScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    if (menuScreen && !menuScreen.classList.contains('hidden')) {
+        document.getElementById('debugToggleButton').style.display = 'none';
+    }
+    if (setupScreen && !setupScreen.classList.contains('hidden')) {
+        document.getElementById('debugToggleButton').style.display = 'none';
+    }
+    if (gameScreen && !gameScreen.classList.contains('hidden')) {
+        document.getElementById('debugToggleButton').style.display = 'inline-flex';
+    }
 
     const autoSaveToggle = document.getElementById('autoSaveToggle');
     if (autoSaveToggle) {
@@ -19,6 +56,12 @@ window.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('hero_auto_save', autoSaveToggle.checked ? 'true' : 'false');
             showToast(autoSaveToggle.checked ? 'Guardado automático activado.' : 'Guardado automático desactivado.', 'info');
         });
+    }
+
+    const playerText = document.getElementById('playerText');
+    if (playerText) {
+        loadDraftText();
+        playerText.addEventListener('input', saveDraftText);
     }
 
     window.addEventListener('keydown', (event) => {
@@ -34,7 +77,7 @@ async function startGame() {
         name: document.getElementById('setupName').value,
         setting: document.getElementById('setupSetting').value,
         seedLevel: document.getElementById('setupSeedLevel').value,
-        duration: document.getElementById('setupDuration').value,
+        duration: 'Microrelato',
         stageIndex: 0,
         turnCount: 0,
         tags: [],
@@ -51,8 +94,10 @@ async function startGame() {
     };
 
     const playerName = gameState.name;
+    const competence = document.getElementById('setupCompetence')?.value?.trim() || 'Conocimiento antiguo';
+    const characteristic = document.getElementById('setupCharacteristic')?.value?.trim() || 'Filántropo';
     gameState.characters[playerName] = { role: 'Protagonista', trait: document.getElementById('setupFlaw').value || 'Neutral' };
-    // Setup default dragon abilities
+    gameState.characterSheet = { competence, characteristic };
     gameState.abilities = [
         { name: 'Llamarada', cooldown: 3, readyIn: 0 },
         { name: 'Encantar', cooldown: 4, readyIn: 0 },
@@ -62,6 +107,7 @@ async function startGame() {
     gameReady = false;
 
     showGameScreen();
+    updateDebugButtonState();
     renderCodex(gameState);
     refreshGameScreen();
 
@@ -79,15 +125,11 @@ async function validateAndEnrichSetup() {
         ambientacion: gameState.setting
     };
 
-    const prompt = `Valida y sintetiza brevemente el setup del personaje. Si el objeto inicial no existe, indica objeto_valido: false. RESPONDE SOLO JSON:\n    {"lore_inicial": "1-2 líneas de lore basado en origen+ambientación", "objeto_valido": true/false}`;
+    const prompt = `Valida y sintetiza brevemente el setup del personaje. RESPONDE SOLO JSON:\n    {"lore_inicial": "1-2 líneas de lore basado en origen+ambientación"}`;
 
     try {
         const enrichedResponse = await executeOpenAI(prompt, setupData, 'VALIDACIÓN DE SETUP');
         if (enrichedResponse.lore_inicial) gameState.lore = enrichedResponse.lore_inicial;
-        const objectProvided = typeof setupData.objeto_inicial === 'string' && setupData.objeto_inicial.trim().length > 0;
-        if (objectProvided && enrichedResponse.objeto_valido === true) {
-            gameState.inventory = [setupData.objeto_inicial];
-        }
         console.log('✓ Setup validado por IA');
     } catch (e) {
         console.warn('Validación de setup falló, continuando con valores por defecto:', e);
@@ -105,6 +147,8 @@ async function generateInitialSeed() {
             nombre: document.getElementById('setupName').value,
             origen: document.getElementById('setupOrigin').value,
             defecto: document.getElementById('setupFlaw').value,
+            competencia: document.getElementById('setupCompetence')?.value || 'Conocimiento antiguo',
+            caracteristica: document.getElementById('setupCharacteristic')?.value || 'Filántropo',
             ambientacion: gameState.setting,
             habilidades: gameState.abilities.map(a => a.name)
         },
@@ -118,9 +162,11 @@ async function generateInitialSeed() {
     {"tagsIniciales": [{"name":"...", "level":3}], "nueva_semilla": "..."}
     - tagsIniciales debe contener EXACTAMENTE 3 objetos.
     - Cada tag debe tener level: 3 y name corto (1 a 3 palabras).
-    - Debes crear tags derivados SOLO del origen y defecto del dragón: no uses el nombre, ambientación ni etapa.
-    - Por ejemplo si el origen es "Montaña Crematoria" y defecto es "Codicia", crea tags narrativos que reflejen ser un dragón de fuego con codicia innata.
-    - No inventes sinónimos que cambien el significado. Conserva el espíritu del origen y defecto.
+    - Crea un tag a partir del defecto, otro a partir de la competencia y otro a partir de la característica del dragón.
+    - Usa los valores exactos del defecto, la competencia y la característica, simplificando solo si hace falta; no inventes un cuarto campo ni cambies el núcleo semántico.
+    - Ejemplos de competencia: "Conocimiento antiguo", "Traductor", "Afinidad mágica".
+    - Ejemplos de característica: "Filántropo", "Amable", "Atento".
+    - No uses el nombre ni la ambientación como tag ni los conviertas en rasgos.
     - La semilla debe reflejar el nivel de semilla elegido y la ambientación proporcionada.
     - Integra las chispas de forma natural sin listarlas literalmente, por ejemplo si una chispa es agua, podrías poner lluvia, un río, una cascada...
     ${instruccionSemilla}`;
@@ -132,10 +178,13 @@ async function generateInitialSeed() {
             gameState.tags = normalizeInitialTagObjects(aiResponse.tagsIniciales);
         }
         if (!Array.isArray(gameState.tags) || gameState.tags.length !== 3) {
+            const defectTag = (document.getElementById('setupFlaw')?.value || 'Codicia').trim();
+            const competenceTag = (document.getElementById('setupCompetence')?.value || 'Conocimiento antiguo').trim();
+            const traitTag = (document.getElementById('setupCharacteristic')?.value || 'Filántropo').trim();
             gameState.tags = [
-                { name: 'Determinación', level: 3 },
-                { name: 'Sombra', level: 3 },
-                { name: 'Sacrificio', level: 3 }
+                { name: defectTag.split(' ').slice(0, 3).join(' ') || 'Codicia', level: 3 },
+                { name: competenceTag.split(' ').slice(0, 3).join(' ') || 'Conocimiento antiguo', level: 3 },
+                { name: traitTag.split(' ').slice(0, 3).join(' ') || 'Filántropo', level: 3 }
             ];
         }
         gameState.currentSeed = aiResponse.nueva_semilla || aiResponse.semilla || '';
@@ -249,6 +298,7 @@ function loadSaveData(record) {
     if (record.meta?.id) gameState.saveId = record.meta.id;
     gameReady = true;
     showGameScreen();
+    updateDebugButtonState();
     refreshGameScreen();
     notify('Partida cargada desde archivo.', 'success');
 }
@@ -256,9 +306,22 @@ function loadSaveData(record) {
 function newDiary() {
     gameState = {};
     gameReady = false;
+    debugUnlockClicks = 0;
+    debugUnlocked = false;
+    clearDraftText();
     const diaryDisplay = document.getElementById('diaryDisplay');
     if (diaryDisplay) diaryDisplay.innerHTML = '';
+    const dbg = document.getElementById('debugPanel');
+    if (dbg) dbg.style.display = 'none';
     showSetupScreen();
+    updateDebugButtonState();
+    setTimeout(() => {
+        try {
+            showInfoTutorial();
+        } catch (e) {
+            console.warn('Tutorial de ayuda no disponible:', e);
+        }
+    }, 180);
 }
 
 function loadSave(saveId) {
@@ -271,6 +334,7 @@ function loadSave(saveId) {
     gameState.saveId = saveId;
     gameReady = true;
     showGameScreen();
+    updateDebugButtonState();
     refreshGameScreen();
 }
 
@@ -348,11 +412,8 @@ async function turnAI() {
     try {
         const aiResponse = await executeOpenAI(prompt, payload, 'ANÁLISIS DE TURNO');
         if (aiResponse.inyeccion_detectada === true) {
-            showPopup('El Diario del Dragón es un juego de escritura creativa. Si bien es divertido romper el juego en sí, no se creó para este propósito. Si este mensaje ha salido por error, ignóralo; el juego continuará de forma normal.', 'warning', 'Intento de manipulación detectado');
-            document.getElementById('loading').style.display = 'none';
-            turnPending = false;
-            document.getElementById('sendBtn').disabled = false;
-            return;
+            showPopup('Intento de manipulación detectado, pero el juego continúa. Puedes seguir jugando aunque la IA haya avisado.', 'warning', 'Intento de manipulación detectado');
+            playUiSound('warning');
         }
         resolveTurnAnalysis(playerInput, aiResponse);
     } catch (e) {
@@ -424,6 +485,9 @@ function resolveTurnAnalysis(playerInput, aiData) {
     if (isSuccess) gameState.tags.forEach(t => { if(tagsUsed.includes(t.name)) t.level = Math.max(1, t.level - 1); });
     else gameState.tags.forEach(t => { if(!tagsUsed.includes(t.name)) t.level = Math.min(5, t.level + 1); });
 
+    const itemsUsed = Array.isArray(aiData.objetos_usados) ? aiData.objetos_usados : [];
+    const itemsLost = Array.isArray(aiData.objetos_perdidos) ? aiData.objetos_perdidos : [];
+
     const diaryDisplay = document.getElementById('diaryDisplay');
     if (diaryDisplay) {
         diaryDisplay.innerHTML += `<p class="diary-entry">${playerInput}</p>`;
@@ -440,6 +504,7 @@ function resolveTurnAnalysis(playerInput, aiData) {
         itemsLost
     });
     document.getElementById('playerText').value = '';
+    clearDraftText();
 
     const newSummary = gameState.summary + ' ' + (aiData.resumen_turno || '');
     gameState.summary = condenseSummary(newSummary, 300);
@@ -450,6 +515,7 @@ function resolveTurnAnalysis(playerInput, aiData) {
         evalText.classList.remove('result-success', 'result-fail');
         evalText.classList.add(isSuccess ? 'result-success' : 'result-fail');
     }
+    playUiSound('processed');
 
     gameState.pendingResolution = { isSuccess, aiData };
     turnPending = true;
@@ -468,10 +534,11 @@ function tickAbilities() {
 
 function checkAndAdvanceStage() {
     if (!gameState || !gameState.duration) return;
-    const currentStage = gameState.stageIndex;
     const turnCount = gameState.turnCount || 0;
     let shouldAdvance = false;
-    
+
+    if (gameState.freePlay) return;
+
     if (gameState.duration === 'Cuento') {
         shouldAdvance = turnCount > 0;
     } else if (gameState.duration === 'Novela') {
@@ -479,12 +546,20 @@ function checkAndAdvanceStage() {
     } else if (gameState.duration === 'Microrelato') {
         shouldAdvance = turnCount > 0 && turnCount % 3 === 0 && gameState.stageIndex < 6;
     }
-    
+
     if (shouldAdvance && gameState.stageIndex < etapasViaje.length - 1) {
         gameState.stageIndex++;
         const stageLabel = document.getElementById('currentStageDisplay');
         if (stageLabel) stageLabel.innerText = `Etapa: ${gameState.stageIndex + 1}`;
         showToast(`📖 Avanzas a: ${etapasViaje[gameState.stageIndex]}`, 'info');
+    }
+
+    if (gameState.stageIndex >= etapasViaje.length - 1 && !gameState.freePlay) {
+        const continueFreePlay = window.confirm('Has llegado al final de las etapas. ¿Quieres seguir jugando a lo libre?');
+        if (continueFreePlay) {
+            gameState.freePlay = true;
+            showToast('Modo libre activado: la historia sigue con libertad narrativa.', 'info');
+        }
     }
 }
 
@@ -570,24 +645,93 @@ function askOracle() {
 window.startGame = startGame;
 window.turnAI = turnAI;
 window.toggleRAG = () => toggleRAG(gameState);
-// debug can only be activated via secret decor clicks
-window.incrementSecretClick = (function(){
-    let clicks = 0;
-    return function(){
-        clicks++;
-        if (clicks >= 5) {
-            const dbg = document.getElementById('debugPanel');
-            if (dbg) dbg.style.display = 'block';
-            showToast('Modo debug activado', 'info');
-            clicks = 0;
-        }
-    };
-})();
+
+const syncDebugButtonState = () => updateDebugButtonState();
+
+let debugUnlockClicks = 0;
+let debugUnlocked = false;
+
+function updateDebugButtonState() {
+    const button = document.getElementById('debugToggleButton');
+    const dbg = document.getElementById('debugPanel');
+    if (!button) return;
+
+    const gameScreen = document.getElementById('gameScreen');
+    const isDiaryView = !!gameScreen && !gameScreen.classList.contains('hidden');
+    if (!isDiaryView) {
+        button.style.display = 'none';
+        if (dbg) dbg.style.display = 'none';
+        return;
+    }
+
+    button.style.display = 'inline-flex';
+
+    if (!debugUnlocked) {
+        const remaining = Math.max(0, 5 - debugUnlockClicks);
+        if (dbg) dbg.style.display = 'none';
+        button.textContent = `Debug (${remaining})`;
+        button.title = `Pulsa ${remaining} vez${remaining === 1 ? '' : 'es'} más para desbloquear el modo debug`;
+        button.classList.remove('debug-ready-button');
+        button.classList.add('debug-lock-button');
+        return;
+    }
+
+    const isOpen = dbg && window.getComputedStyle(dbg).display !== 'none';
+    button.textContent = isOpen ? 'Cerrar debug' : 'Abrir debug';
+    button.title = isOpen ? 'Cerrar el panel de debug' : 'Abrir el panel de debug';
+    button.classList.remove('debug-lock-button');
+    button.classList.add('debug-ready-button');
+}
+
+window.handleDebugUnlockClick = function() {
+    const dbg = document.getElementById('debugPanel');
+    const gameScreen = document.getElementById('gameScreen');
+    const isDiaryView = !!gameScreen && !gameScreen.classList.contains('hidden');
+
+    if (!isDiaryView) {
+        if (dbg) dbg.style.display = 'none';
+        return;
+    }
+
+    if (debugUnlocked) {
+        const shouldOpen = !(dbg && window.getComputedStyle(dbg).display !== 'none');
+        if (dbg) dbg.style.display = shouldOpen ? 'block' : 'none';
+        updateDebugButtonState();
+        return;
+    }
+
+    debugUnlockClicks += 1;
+    const remaining = 5 - debugUnlockClicks;
+
+    if (remaining > 0) {
+        showToast(`Pulsa ${remaining} vez${remaining === 1 ? '' : 'es'} más para activar el modo debug.`, 'info');
+        playUiSound('warning');
+        updateDebugButtonState();
+        return;
+    }
+
+    debugUnlocked = true;
+    if (dbg) dbg.style.display = 'block';
+    showToast('Modo debug activado.', 'success');
+    playUiSound('processed');
+    updateDebugButtonState();
+};
+
+window.incrementSecretClick = window.handleDebugUnlockClick;
 window.askOracle = askOracle;
 window.showHelp = showHelp;
-window.showMenu = showMenu;
-window.showSetupScreen = showSetupScreen;
-window.showGameScreen = showGameScreen;
+window.showMenu = function() {
+    showMenu();
+    syncDebugButtonState();
+};
+window.showSetupScreen = function() {
+    showSetupScreen();
+    syncDebugButtonState();
+};
+window.showGameScreen = function() {
+    showGameScreen();
+    syncDebugButtonState();
+};
 window.randomizeSetup = randomizeSetup;
 window.closePopup = closePopup;
 window.notify = notify;

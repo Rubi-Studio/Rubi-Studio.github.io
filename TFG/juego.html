@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="style/style.css" />
 </head>
 
-<body>
+<body data-game="hero">
     <div class="game-wrapper">
         <div class="top-bar">
-            <button class="icon-button" onclick="toggleDebug()" title="Modo Debug">🐛</button>
+            <button class="icon-button" onclick="toggleDebug()" title="Activar o desactivar el modo debug" aria-label="Activar o desactivar el modo debug">🐛</button>
             <button class="secondary-button" onclick="showApiConfig()">⚙️ Configurar API</button>
         </div>
 
@@ -72,26 +72,20 @@
             <div class="form-group">
                 <label>Nivel de Semilla <span class="help-icon" onclick="showHelp('semilla')">ⓘ</span></label>
                 <select id="setupSeedLevel">
-                    <option value="Inspirativas">Inspirativas (Solo conceptos)</option>
-                    <option value="Moderadas">Moderadas (Frases cortas)</option>
-                    <option value="Escénicas">Escénicas (Escenarios directos)</option>
+                    <option value="Inspirativas">Inspirativas</option>
                 </select>
             </div>
-            <div class="form-group">
+            <div class="form-group hidden">
                 <label>Duración de la Historia <span class="help-icon" onclick="showHelp('duracion')">ⓘ</span></label>
                 <select id="setupDuration">
-                    <option value="Microrelato">Microrelato (~15-30 min)</option>
-                    <option value="Cuento" selected>Cuento (~30-60 min)</option>
-                    <option value="Novela">Novela (~1-2 horas)</option>
+                    <option value="Microrelato" selected>Microrelato</option>
+                    <option value="Cuento">Cuento</option>
+                    <option value="Novela">Novela</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Ambientación:</label>
                 <input type="text" id="setupSetting" value="Fantasía oscura en un reino nevado." />
-            </div>
-            <div class="form-group">
-                <label>Objeto inicial (opcional):</label>
-                <input type="text" id="setupItem" placeholder="Poción, llave, amuleto..." />
             </div>
             <button class="btn-start" onclick="startGame()">Comenzar Aventura</button>
         </div>

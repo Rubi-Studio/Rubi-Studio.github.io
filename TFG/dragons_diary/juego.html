@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="style/dragons.css" />
 </head>
 
-<body>
+<body data-game="dragon">
     <div class="game-wrapper">
         <div class="top-bar">
-            <div id="secretDecor" class="secret-decor" onclick="incrementSecretClick()" title=""></div>
+            <button id="debugToggleButton" class="debug-lock-button" onclick="handleDebugUnlockClick()" title="Desbloquear el modo debug" aria-label="Desbloquear el modo debug" style="display: none;">Debug</button>
         </div>
 
-        <div id="debugPanel" class="debug-panel">
+        <div id="debugPanel" class="debug-panel" style="display: none;">
             <strong>DEBUG</strong>
             <p class="help-text">No hay llamadas a la IA aún. Activa el modo debug y realiza una acción para ver la traza.</p>
         </div>
@@ -41,8 +41,8 @@
             </div>
 
             <div class="form-group">
-                <label>Nombre y Esencia:</label>
-                <input type="text" id="setupName" value="Azhul, Guardián de las Llamas" />
+                <label>Nombre:</label>
+                <input type="text" id="setupName" value="Azhul" />
             </div>
             <div class="form-group">
                 <label>Origen:</label>
@@ -53,26 +53,30 @@
                 <input type="text" id="setupFlaw" value="Susurros de la corrupción" />
             </div>
             <div class="form-group">
-                <label>Nivel de Semilla <span class="help-icon" onclick="showHelp('semilla')">ⓘ</span></label>
-                <select id="setupSeedLevel">
-                    <option value="Inspirativas">Inspirativas (Solo conceptos)</option>
-                </select>
+                <label>Competencia:</label>
+                <input type="text" id="setupCompetence" value="Conocimiento antiguo" placeholder="Conocimiento antiguo, traductor, afinidad mágica..." />
             </div>
             <div class="form-group">
+                <label>Características:</label>
+                <input type="text" id="setupCharacteristic" value="Filántropo" placeholder="Filántropo, amable, atento..." />
+            </div>
+            <div class="form-group">
+                <label>Nivel de Semilla <span class="help-icon" onclick="showHelp('semilla')">ⓘ</span></label>
+                <select id="setupSeedLevel">
+                    <option value="Inspirativas">Inspirativas</option>
+                </select>
+            </div>
+            <div class="form-group hidden">
                 <label>Duración de la Historia <span class="help-icon" onclick="showHelp('duracion')">ⓘ</span></label>
                 <select id="setupDuration">
-                    <option value="Microrelato">Microrelato (~15-30 min)</option>
-                    <option value="Cuento" selected>Cuento (~30-60 min)</option>
-                    <option value="Novela">Novela (~1-2 horas)</option>
+                    <option value="Microrelato" selected>Microrelato</option>
+                    <option value="Cuento">Cuento</option>
+                    <option value="Novela">Novela</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Ambientación:</label>
                 <input type="text" id="setupSetting" value="Torres encantadas, niebla y hechizos protectores." />
-            </div>
-            <div class="form-group">
-                <label>Objeto inicial (opcional):</label>
-                <input type="text" id="setupItem" placeholder="Escama dorada, gema, amuleto..." />
             </div>
             <button class="btn-start" onclick="startGame()">Comenzar Aventura</button>
         </div>
@@ -108,7 +112,7 @@
 
                     <textarea id="playerText" class="diary-input" placeholder="Escribe tu entrada en el diario..."></textarea>
                     <button id="sendBtn" class="btn-send" onclick="turnAI()">Añadir al Diario</button>
-                    <div id="loading" class="loading-text">El Destino está decidiendo...</div>
+                    <div id="loading" class="loading-text">⧖ El Destino está decidiendo...</div>
 
                     <div id="ragPanel" class="rag-panel">
                         <h3 class="panel-heading">Memoria del Mundo (RAG) <span class="help-icon" onclick="showHelp('rag')">ⓘ</span></h3>

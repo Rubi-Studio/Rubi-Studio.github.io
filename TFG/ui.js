@@ -1,7 +1,11 @@
 import { etapasViaje, RANDOM_DATA } from './utils.js';
 
-const SAVE_INDEX_KEY = 'hero_save_index';
-const SAVE_KEY_PREFIX = 'hero_save_';
+function getStorageNamespace() {
+    return document.body?.dataset?.game === 'dragon' ? 'dragon' : 'hero';
+}
+
+const SAVE_INDEX_KEY = () => `${getStorageNamespace()}_save_index`;
+const SAVE_KEY_PREFIX = () => `${getStorageNamespace()}_save_`;
 
 function formatTimestamp(value) {
     const date = new Date(value);
@@ -21,7 +25,7 @@ function downloadFile(filename, contents, mimeType) {
 }
 
 function getSavedGames() {
-    const raw = localStorage.getItem(SAVE_INDEX_KEY);
+    const raw = localStorage.getItem(SAVE_INDEX_KEY());
     if (!raw) return [];
     try {
         return JSON.parse(raw);
@@ -31,7 +35,7 @@ function getSavedGames() {
 }
 
 function persistSavedGames(list) {
-    localStorage.setItem(SAVE_INDEX_KEY, JSON.stringify(list));
+    localStorage.setItem(SAVE_INDEX_KEY(), JSON.stringify(list));
 }
 
 function createSaveId() {
@@ -152,7 +156,7 @@ export function saveGameState(gameState, title) {
         updated: new Date().toISOString()
     };
     const record = { meta, gameState: { ...gameState, saveId } };
-    localStorage.setItem(`${SAVE_KEY_PREFIX}${saveId}`, JSON.stringify(record));
+    localStorage.setItem(`${SAVE_KEY_PREFIX()}${saveId}`, JSON.stringify(record));
     persistSavedGames([meta, ...list.filter(item => item.id !== saveId)]);
     renderSaveList();
     return saveId;
@@ -160,13 +164,13 @@ export function saveGameState(gameState, title) {
 
 export function deleteSavedGame(saveId) {
     const list = getSavedGames().filter(item => item.id !== saveId);
-    localStorage.removeItem(`${SAVE_KEY_PREFIX}${saveId}`);
+    localStorage.removeItem(`${SAVE_KEY_PREFIX()}${saveId}`);
     persistSavedGames(list);
     renderSaveList();
 }
 
 export function loadSavedGame(saveId) {
-    const raw = localStorage.getItem(`${SAVE_KEY_PREFIX}${saveId}`);
+    const raw = localStorage.getItem(`${SAVE_KEY_PREFIX()}${saveId}`);
     if (!raw) return null;
     try {
         return JSON.parse(raw);
@@ -295,6 +299,67 @@ function createToastContainer() {
         document.body.appendChild(container);
     }
     return container;
+}
+
+const SOUND_PROFILES = {
+    hover: { type: 'triangle', frequency: 520, duration: 0.06, volume: 0.025, sweep: 70 },
+    button: { type: 'square', frequency: 660, duration: 0.08, volume: 0.035, sweep: 110 },
+    submit: { type: 'sawtooth', frequency: 420, duration: 0.14, volume: 0.045, sweep: 160 },
+    processed: { type: 'triangle', frequency: 780, duration: 0.18, volume: 0.04, sweep: 220 },
+    warning: { type: 'sawtooth', frequency: 260, duration: 0.2, volume: 0.05, sweep: 140 }
+};
+
+export function playUiSound(kind = 'button') {
+    const profile = SOUND_PROFILES[kind] || SOUND_PROFILES.button;
+    const AudioCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtor) return;
+
+    if (!playUiSound.context) {
+        playUiSound.context = new AudioCtor();
+    }
+
+    const ctx = playUiSound.context;
+    if (ctx.state === 'suspended') {
+        ctx.resume();
+    }
+
+    const now = ctx.currentTime;
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    oscillator.type = profile.type;
+    oscillator.frequency.setValueAtTime(profile.frequency, now);
+    oscillator.frequency.linearRampToValueAtTime(profile.frequency + profile.sweep, now + profile.duration);
+    gainNode.gain.setValueAtTime(profile.volume, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    oscillator.start(now);
+    oscillator.stop(now + profile.duration);
+}
+
+export function registerUiSoundBindings() {
+    const buttons = document.querySelectorAll('button, .icon-button, .secondary-button, .btn-start, .btn-send, .mini-button');
+    buttons.forEach((button) => {
+        if (button.dataset.soundBound === 'true') return;
+        button.dataset.soundBound = 'true';
+        button.addEventListener('pointerover', () => playUiSound('hover'), { passive: true });
+        button.addEventListener('click', () => playUiSound('button'));
+    });
+
+    const sendBtn = document.getElementById('sendBtn');
+    if (sendBtn) {
+        sendBtn.addEventListener('click', () => playUiSound('submit'));
+    }
+
+    const playerText = document.getElementById('playerText');
+    if (playerText) {
+        playerText.addEventListener('keydown', (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                playUiSound('submit');
+            }
+        });
+    }
 }
 
 export function showToast(message, type = 'info', duration = 2200) {
