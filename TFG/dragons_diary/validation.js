@@ -41,14 +41,16 @@ export function detectGameBreaking(text) {
 export function validateAIAdherence(aiResponse, seedLevel, currentSeed) {
     if (!aiResponse || !currentSeed) return { isAdherent: true, severity: null };
     const responseText = (aiResponse.nueva_semilla || '').toLowerCase();
-    if (seedLevel.includes('Inspirativas')) {
+    const normalizedSeedLevel = String(seedLevel || 'Inspirativas');
+
+    if (normalizedSeedLevel.includes('Inspirativas')) {
         return { isAdherent: responseText.length > 0, severity: 'low' };
     }
-    if (seedLevel.includes('Moderadas')) {
+    if (normalizedSeedLevel.includes('Moderadas')) {
         const hasMinimalStructure = responseText.split(' ').length > 3;
         return { isAdherent: hasMinimalStructure, severity: 'medium' };
     }
-    if (seedLevel.includes('Escénicas')) {
+    if (normalizedSeedLevel.includes('Escénicas')) {
         const violatesScene = /ignore|forget|ahora|a partir|from now|new|nuevo rol/i.test(responseText);
         return { isAdherent: !violatesScene, severity: 'high' };
     }

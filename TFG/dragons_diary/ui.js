@@ -248,12 +248,9 @@ export function renderSaveList() {
 export function toggleRAG(gameState) {
     const rag = document.getElementById('ragPanel');
     if (!rag) return;
-    const computed = window.getComputedStyle(rag);
-    const isHidden = rag.style.display === 'none' || computed.display === 'none';
-    rag.style.display = isHidden ? 'block' : 'none';
-    if (isHidden) {
+    rag.style.display = 'block';
+    if (gameState) {
         renderCodex(gameState);
-        setTimeout(() => { try { rag.scrollIntoView({ behavior: 'smooth' }); } catch (e) {} }, 80);
     }
 }
 
@@ -278,7 +275,7 @@ export function showInfoTutorial() {
         <strong class="help-highlight">Tutorial de ayuda</strong><br><br>
         <strong>1.</strong> Los iconos <strong>ⓘ</strong> abren explicaciones rápidas de cada bloque.<br>
         <strong>2.</strong> La <strong>Dificultad</strong> indica el número mínimo que debes superar con tus rasgos, estados y decisiones.<br>
-        <strong>3.</strong> La <strong>Semilla</strong> marca la inspiración del siguiente turno, pero tú sigues escribiendo la historia.<br>
+        <strong>3.</strong> La <strong>Semilla</strong> es una inspiración, pero el sistema no busca una palabra exacta: valora si tu texto usa la idea o la noción correcta.<br>
         <strong>4.</strong> El <strong>Oráculo</strong> te resuelve una duda cuando no sabes por dónde continuar.<br>
         <strong>5.</strong> La <strong>Memoria</strong> guarda el lore y el resumen para que la IA mantenga coherencia.
     `;
@@ -289,13 +286,13 @@ export function showHelp(topic) {
     const helpTexts = {
         'tags': "Rasgos inherentes de tu personaje. Su nivel (1-5) suma a la tirada si los usas en la narración; bajan al usarlos y suben si los ignoras.",
         'estados': "Modificadores temporales (+1 o -1). Surgen tras cada turno y desaparecen cuando la IA te ha incluido en tu historia.",
-        'semilla': "Define cuánta libertad narrativa tienes. Inspirativa (5 palabras sueltas), Moderada (1 frase) o Escénica (la IA plantea la escena).",
-        'semilla_juego': "Tu inspiración para este turno. Usa esta premisa para continuar el diario e intentar superar la dificultad.",
+        'semilla': "La semilla es una inspiración, no un bloqueo literal. El análisis se centra en la noción o la idea que usas en el texto, no en que aparezca una palabra exacta.",
+        'semilla_juego': "Tu inspiración para este turno. Usa la idea que te sugiere, pero la IA evalúa si tu entrada encaja con la noción, no si repites una palabra exacta.",
         'etapa': "Las fases del Viaje del Héroe avanzan automáticamente según la duración elegida. Marcan el tono de la historia.",
         'dificultad': "Número a igualar o superar. Escribe tu entrada integrando Tags, Estados e Inventario para que la suma alcance este valor.",
         'habilidades': "Ataques especiales del dragón (Llamarada, Encantar, Volar) con recarga. La utilidad de cada habilidad vale 1-3 puntos según cómo la uses: 1 = marginal, 2 = moderado, 3 = impactante y narrativamente poderoso. La IA evalúa cada uso.",
         'inventario': "Objetos que encuentras en la aventura. Pueden sumar +1 a la dificultad y algunos se consumen o pierden con el uso.",
-        'rag': "La memoria del sistema. El Lore no cambia a menos que tú lo edites. El Resumen se condensa automáticamente con cada entrada.",
+        'rag': "La memoria del sistema guarda lore y resumen para mantener coherencia. Puedes editarla para orientar la IA, pero no hace falta hacerlo para jugar.",
         'duracion': "Determina cuándo avanza la historia: Microrelato (saltos rápidos), Cuento (cada acción), Novela (cada 2 acciones).",
         'oraculo': "No afecta a la trama ni al sistema, pero cuando tengas que decidir y no estés seguro, el oráculo te ayudará. Responderá: No, No pero..., Si pero..., o Si."
     };

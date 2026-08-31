@@ -76,7 +76,7 @@ async function startGame() {
     gameState = {
         name: document.getElementById('setupName').value,
         setting: document.getElementById('setupSetting').value,
-        seedLevel: document.getElementById('setupSeedLevel').value,
+        seedLevel: 'Inspirativas',
         duration: 'Microrelato',
         stageIndex: 0,
         turnCount: 0,

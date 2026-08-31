@@ -60,12 +60,6 @@
                 <label>Características:</label>
                 <input type="text" id="setupCharacteristic" value="Filántropo" placeholder="Filántropo, amable, atento..." />
             </div>
-            <div class="form-group">
-                <label>Nivel de Semilla <span class="help-icon" onclick="showHelp('semilla')">ⓘ</span></label>
-                <select id="setupSeedLevel">
-                    <option value="Inspirativas">Inspirativas</option>
-                </select>
-            </div>
             <div class="form-group hidden">
                 <label>Duración de la Historia <span class="help-icon" onclick="showHelp('duracion')">ⓘ</span></label>
                 <select id="setupDuration">
@@ -100,7 +94,6 @@
                             <button class="oracle-button" onclick="askOracle()" title="Consulta el Oráculo para decisiones dudosas">Oráculo</button>
                             <span class="help-icon" onclick="showHelp('oraculo')">ⓘ</span>
                         </div>
-                        <button class="icon-button" onclick="toggleRAG()" title="Abrir Memoria del Mundo">Memoria</button>
                     </div>
 
                     <div class="difficulty-indicator">
@@ -114,9 +107,9 @@
                     <button id="sendBtn" class="btn-send" onclick="turnAI()">Añadir al Diario</button>
                     <div id="loading" class="loading-text">⧖ El Destino está decidiendo...</div>
 
-                    <div id="ragPanel" class="rag-panel">
-                        <h3 class="panel-heading">Memoria del Mundo (RAG) <span class="help-icon" onclick="showHelp('rag')">ⓘ</span></h3>
-                        <p class="help-text">Puedes editar esto manualmente para guiar a la IA.</p>
+                    <div id="ragPanel" class="rag-panel" style="display: block;">
+                        <h3 class="panel-heading">Memoria del Mundo <span class="help-icon" onclick="showHelp('rag')">ⓘ</span></h3>
+                        <p class="help-text">Puedes editar esto manualmente para guiar a la IA, pero no hace falta para jugar.</p>
                         <div class="panel-block">
                             <strong>Lore y Mundo:</strong>
                             <div id="worldLore" class="editable-box" contenteditable="true"></div>
