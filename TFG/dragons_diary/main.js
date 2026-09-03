@@ -745,4 +745,5 @@ window.loadSave = loadSave;
 window.deleteSave = deleteSave;
 window.downloadSave = downloadSave;
 window.downloadDiary = downloadDiary;
+window.generateNextSeed = generateNextSeed;
 window.renderSaveList = renderSaveList;

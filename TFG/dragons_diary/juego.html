@@ -105,6 +105,7 @@
 
                     <textarea id="playerText" class="diary-input" placeholder="Escribe tu entrada en el diario..."></textarea>
                     <button id="sendBtn" class="btn-send" onclick="turnAI()">Añadir al Diario</button>
+                    <button id="nextTurnBtn" class="secondary-button" style="display:none; margin-left:8px;" onclick="generateNextSeed()">Continuar</button>
                     <div id="loading" class="loading-text">⧖ El Destino está decidiendo...</div>
 
                     <div id="ragPanel" class="rag-panel" style="display: block;">
@@ -155,6 +156,28 @@
         </div>
     </div>
 
+    <!-- Intro modal shown antes de empezar la partida -->
+    <div id="introOverlay" class="popup-overlay" style="display:flex;">
+        <div class="popup-card">
+            <div class="popup-header">
+                <strong>Contexto</strong>
+                <button class="popup-close" onclick="closeIntro()">×</button>
+            </div>
+            <div class="popup-message">
+                <p>Eres un dragón al que un mago le ha robado el tesoro. Este diario es tu único objetivo y responsabilidad:</p>
+                <ul>
+                    <li>Escribe tus entradas en el diario para registrar la búsqueda y tus decisiones.</li>
+                    <li>Si cumples los objetivos, ocurrirán cosas buenas para el dragón; si fallas, pueden pasar cosas malas.</li>
+                    <li>No estás obligado a que un fallo tenga consecuencias negativas — si decides no aplicarlas, dejarás de estar "jugando" formalmente, pero puedes seguir escribiendo libremente.</li>
+                </ul>
+                <p>Cuando estés listo, pulsa "Entendido, empezar" para preparar al dragón y continuar.</p>
+            </div>
+            <div class="popup-actions">
+                <button class="popup-button" onclick="closeIntro()">Entendido, empezar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="popupOverlay" class="popup-overlay">
         <div class="popup-card">
             <div class="popup-header">
@@ -167,6 +190,13 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function closeIntro() {
+            const intro = document.getElementById('introOverlay');
+            if (intro) intro.style.display = 'none';
+        }
+    </script>
 
     <script type="module" src="main.js"></script>
 </body>
